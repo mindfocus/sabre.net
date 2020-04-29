@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
-namespace Sabre\DAV\Exception;
+namespace Sabre\DAV\ExceptionNs;
 
 use Sabre\DAV;
 
 /**
- * ServiceUnavailable.
+ * Payment Required.
  *
- * This exception is thrown in case the service
- * is currently not available (e.g. down for maintenance).
+ * The PaymentRequired exception may be thrown in a case where a user must pay
+ * to access a certain resource or operation.
  *
- * @author Thomas Müller <thomas.mueller@tmit.eu>
  * @copyright Copyright (C) fruux GmbH (https://fruux.com/)
+ * @author Evert Pot (http://evertpot.com/)
  * @license http://sabre.io/license/ Modified BSD License
  */
-class ServiceUnavailable extends DAV\Exception
+class PaymentRequired extends DAV\Exception
 {
     /**
      * Returns the HTTP statuscode for this exception.
@@ -25,6 +25,6 @@ class ServiceUnavailable extends DAV\Exception
      */
     public function getHTTPCode()
     {
-        return 503;
+        return 402;
     }
 }

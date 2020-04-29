@@ -2,29 +2,29 @@
 
 declare(strict_types=1);
 
-namespace Sabre\DAV\Exception;
+namespace Sabre\DAV\ExceptionNs;
 
 use Sabre\DAV;
 
 /**
- * Payment Required.
+ * RequestedRangeNotSatisfiable.
  *
- * The PaymentRequired exception may be thrown in a case where a user must pay
- * to access a certain resource or operation.
+ * This exception is normally thrown when the user
+ * request a range that is out of the entity bounds.
  *
  * @copyright Copyright (C) fruux GmbH (https://fruux.com/)
  * @author Evert Pot (http://evertpot.com/)
  * @license http://sabre.io/license/ Modified BSD License
  */
-class PaymentRequired extends DAV\Exception
+class RequestedRangeNotSatisfiable extends DAV\Exception
 {
     /**
-     * Returns the HTTP statuscode for this exception.
+     * returns the http statuscode for this exception.
      *
      * @return int
      */
     public function getHTTPCode()
     {
-        return 402;
+        return 416;
     }
 }

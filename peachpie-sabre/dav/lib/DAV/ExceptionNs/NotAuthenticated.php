@@ -2,20 +2,21 @@
 
 declare(strict_types=1);
 
-namespace Sabre\DAV\Exception;
+namespace Sabre\DAV\ExceptionNs;
 
 use Sabre\DAV;
 
 /**
- * InsufficientStorage.
+ * NotAuthenticated.
  *
- * This Exception can be thrown, when for example a harddisk is full or a quota is exceeded
+ * This exception is thrown when the client did not provide valid
+ * authentication credentials.
  *
  * @copyright Copyright (C) fruux GmbH (https://fruux.com/)
  * @author Evert Pot (http://evertpot.com/)
  * @license http://sabre.io/license/ Modified BSD License
  */
-class InsufficientStorage extends DAV\Exception
+class NotAuthenticated extends DAV\Exception
 {
     /**
      * Returns the HTTP statuscode for this exception.
@@ -24,6 +25,6 @@ class InsufficientStorage extends DAV\Exception
      */
     public function getHTTPCode()
     {
-        return 507;
+        return 401;
     }
 }

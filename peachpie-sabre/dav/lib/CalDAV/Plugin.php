@@ -86,7 +86,7 @@ class Plugin extends DAV\ServerPlugin
         if ($node instanceof DAV\IExtendedCollection) {
             try {
                 $node->getChild($name);
-            } catch (DAV\Exception\NotFound $e) {
+            } catch (DAV\ExceptionNs\NotFound $e) {
                 return ['MKCALENDAR'];
             }
         }

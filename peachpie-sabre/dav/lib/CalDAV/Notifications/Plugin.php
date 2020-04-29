@@ -114,7 +114,7 @@ class Plugin extends ServerPlugin
 
         try {
             $node = $this->server->tree->getNodeForPath($path);
-        } catch (DAV\Exception\NotFound $e) {
+        } catch (DAV\ExceptionNs\NotFound $e) {
             return;
         }
 

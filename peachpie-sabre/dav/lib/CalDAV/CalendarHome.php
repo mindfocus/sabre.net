@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Sabre\CalDAV;
 
 use Sabre\DAV;
-use Sabre\DAV\Exception\NotFound;
+use Sabre\DAV\ExceptionNs\NotFound;
 use Sabre\DAV\MkCol;
 use Sabre\DAVACL;
 use Sabre\Uri;
@@ -70,7 +70,7 @@ class CalendarHome implements DAV\IExtendedCollection, DAVACL\IACL
      */
     public function setName($name)
     {
-        throw new DAV\Exception\Forbidden();
+        throw new DAV\ExceptionNs\Forbidden();
     }
 
     /**
@@ -78,7 +78,7 @@ class CalendarHome implements DAV\IExtendedCollection, DAVACL\IACL
      */
     public function delete()
     {
-        throw new DAV\Exception\Forbidden();
+        throw new DAV\ExceptionNs\Forbidden();
     }
 
     /**
@@ -101,7 +101,7 @@ class CalendarHome implements DAV\IExtendedCollection, DAVACL\IACL
      */
     public function createFile($filename, $data = null)
     {
-        throw new DAV\Exception\MethodNotAllowed('Creating new files in this collection is not supported');
+        throw new DAV\ExceptionNs\MethodNotAllowed('Creating new files in this collection is not supported');
     }
 
     /**
@@ -113,7 +113,7 @@ class CalendarHome implements DAV\IExtendedCollection, DAVACL\IACL
      */
     public function createDirectory($filename)
     {
-        throw new DAV\Exception\MethodNotAllowed('Creating new collections in this collection is not supported');
+        throw new DAV\ExceptionNs\MethodNotAllowed('Creating new collections in this collection is not supported');
     }
 
     /**

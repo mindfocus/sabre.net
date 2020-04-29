@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
-namespace Sabre\DAV\Exception;
+namespace Sabre\DAV\ExceptionNs;
 
 use Sabre\DAV;
 
 /**
- * Conflict.
+ * ServiceUnavailable.
  *
- * A 409 Conflict is thrown when a user tried to make a directory over an existing
- * file or in a parent directory that doesn't exist.
+ * This exception is thrown in case the service
+ * is currently not available (e.g. down for maintenance).
  *
+ * @author Thomas Müller <thomas.mueller@tmit.eu>
  * @copyright Copyright (C) fruux GmbH (https://fruux.com/)
- * @author Evert Pot (http://evertpot.com/)
  * @license http://sabre.io/license/ Modified BSD License
  */
-class Conflict extends DAV\Exception
+class ServiceUnavailable extends DAV\Exception
 {
     /**
      * Returns the HTTP statuscode for this exception.
@@ -25,6 +25,6 @@ class Conflict extends DAV\Exception
      */
     public function getHTTPCode()
     {
-        return 409;
+        return 503;
     }
 }

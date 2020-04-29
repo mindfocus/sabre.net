@@ -2,21 +2,20 @@
 
 declare(strict_types=1);
 
-namespace Sabre\DAV\Exception;
+namespace Sabre\DAV\ExceptionNs;
 
 use Sabre\DAV;
 
 /**
- * LengthRequired.
+ * InsufficientStorage.
  *
- * This exception is thrown when a request was made that required a
- * Content-Length header, but did not contain one.
+ * This Exception can be thrown, when for example a harddisk is full or a quota is exceeded
  *
  * @copyright Copyright (C) fruux GmbH (https://fruux.com/)
  * @author Evert Pot (http://evertpot.com/)
  * @license http://sabre.io/license/ Modified BSD License
  */
-class LengthRequired extends DAV\Exception
+class InsufficientStorage extends DAV\Exception
 {
     /**
      * Returns the HTTP statuscode for this exception.
@@ -25,6 +24,6 @@ class LengthRequired extends DAV\Exception
      */
     public function getHTTPCode()
     {
-        return 411;
+        return 507;
     }
 }

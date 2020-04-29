@@ -16,7 +16,7 @@ use Sabre\DAV;
  * @author Evert Pot (http://evertpot.com/)
  * @license http://sabre.io/license/ Modified BSD License
  */
-class NeedPrivileges extends DAV\Exception\Forbidden
+class NeedPrivileges extends DAV\ExceptionNs\Forbidden
 {
     /**
      * The relevant uri.

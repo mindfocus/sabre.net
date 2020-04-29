@@ -56,7 +56,7 @@ class User extends DAVACL\Principal implements DAV\ICollection
     {
         $principal = $this->principalBackend->getPrincipalByPath($this->getPrincipalURL().'/'.$name);
         if (!$principal) {
-            throw new DAV\Exception\NotFound('Node with name '.$name.' was not found');
+            throw new DAV\ExceptionNs\NotFound('Node with name '.$name.' was not found');
         }
         if ('calendar-proxy-read' === $name) {
             return new ProxyRead($this->principalBackend, $this->principalProperties);
@@ -66,7 +66,7 @@ class User extends DAVACL\Principal implements DAV\ICollection
             return new ProxyWrite($this->principalBackend, $this->principalProperties);
         }
 
-        throw new DAV\Exception\NotFound('Node with name '.$name.' was not found');
+        throw new DAV\ExceptionNs\NotFound('Node with name '.$name.' was not found');
     }
 
     /**
@@ -100,7 +100,7 @@ class User extends DAVACL\Principal implements DAV\ICollection
             $this->getChild($name);
 
             return true;
-        } catch (DAV\Exception\NotFound $e) {
+        } catch (DAV\ExceptionNs\NotFound $e) {
             return false;
         }
     }

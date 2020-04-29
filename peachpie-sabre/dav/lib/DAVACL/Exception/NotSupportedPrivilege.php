@@ -14,7 +14,7 @@ use Sabre\DAV;
  * @author Evert Pot (http://evertpot.com/)
  * @license http://sabre.io/license/ Modified BSD License
  */
-class NotSupportedPrivilege extends DAV\Exception\PreconditionFailed
+class NotSupportedPrivilege extends DAV\ExceptionNs\PreconditionFailed
 {
     /**
      * Adds in extra information in the xml response.

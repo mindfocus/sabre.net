@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
-namespace Sabre\DAV\Exception;
+namespace Sabre\DAV\ExceptionNs;
 
 use Sabre\DAV;
 
 /**
- * BadRequest.
+ * LengthRequired.
  *
- * The BadRequest is thrown when the user submitted an invalid HTTP request
- * BadRequest
+ * This exception is thrown when a request was made that required a
+ * Content-Length header, but did not contain one.
  *
  * @copyright Copyright (C) fruux GmbH (https://fruux.com/)
  * @author Evert Pot (http://evertpot.com/)
  * @license http://sabre.io/license/ Modified BSD License
  */
-class BadRequest extends DAV\Exception
+class LengthRequired extends DAV\Exception
 {
     /**
      * Returns the HTTP statuscode for this exception.
@@ -25,6 +25,6 @@ class BadRequest extends DAV\Exception
      */
     public function getHTTPCode()
     {
-        return 400;
+        return 411;
     }
 }

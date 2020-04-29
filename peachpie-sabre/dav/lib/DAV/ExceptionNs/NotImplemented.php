@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace Sabre\DAV\Exception;
+namespace Sabre\DAV\ExceptionNs;
 
 use Sabre\DAV;
 
 /**
- * NotFound.
+ * NotImplemented.
  *
- * This Exception is thrown when a Node couldn't be found. It returns HTTP error code 404
+ * This exception is thrown when the client tried to call an unsupported HTTP method or other feature
  *
  * @copyright Copyright (C) fruux GmbH (https://fruux.com/)
  * @author Evert Pot (http://evertpot.com/)
  * @license http://sabre.io/license/ Modified BSD License
  */
-class NotFound extends DAV\Exception
+class NotImplemented extends DAV\Exception
 {
     /**
      * Returns the HTTP statuscode for this exception.
@@ -24,6 +24,6 @@ class NotFound extends DAV\Exception
      */
     public function getHTTPCode()
     {
-        return 404;
+        return 501;
     }
 }

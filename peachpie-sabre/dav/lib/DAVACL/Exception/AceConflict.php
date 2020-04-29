@@ -14,7 +14,7 @@ use Sabre\DAV;
  * @author Evert Pot (http://evertpot.com/)
  * @license http://sabre.io/license/ Modified BSD License
  */
-class AceConflict extends DAV\Exception\Conflict
+class AceConflict extends DAV\ExceptionNs\Conflict
 {
     /**
      * Adds in extra information in the xml response.

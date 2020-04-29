@@ -5,6 +5,10 @@ VisualStudioVersion = 16.0.30021.99
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{13B669BE-BB05-4DDF-9536-439F39A36129}") = "sabre.net", "sabre.net.msbuildproj", "{23089E8D-C839-40AC-B732-4145A68CB5D6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sabre.net.tests", "..\sabre.net.tests\sabre.net.tests.csproj", "{F7650630-8D78-4350-942E-6216E72E1FE5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sabre.net.bridge", "..\sabre.net.bridge\sabre.net.bridge.csproj", "{C83561EC-0D61-4C22-9F69-764F0FC2E95D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{23089E8D-C839-40AC-B732-4145A68CB5D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{23089E8D-C839-40AC-B732-4145A68CB5D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{23089E8D-C839-40AC-B732-4145A68CB5D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F7650630-8D78-4350-942E-6216E72E1FE5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7650630-8D78-4350-942E-6216E72E1FE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F7650630-8D78-4350-942E-6216E72E1FE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F7650630-8D78-4350-942E-6216E72E1FE5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C83561EC-0D61-4C22-9F69-764F0FC2E95D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C83561EC-0D61-4C22-9F69-764F0FC2E95D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C83561EC-0D61-4C22-9F69-764F0FC2E95D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C83561EC-0D61-4C22-9F69-764F0FC2E95D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

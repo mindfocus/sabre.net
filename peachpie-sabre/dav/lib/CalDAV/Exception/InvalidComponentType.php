@@ -14,7 +14,7 @@ use Sabre\DAV;
  * @author Evert Pot (http://evertpot.com/)
  * @license http://sabre.io/license/ Modified BSD License
  */
-class InvalidComponentType extends DAV\Exception\Forbidden
+class InvalidComponentType extends DAV\ExceptionNs\Forbidden
 {
     /**
      * Adds in extra information in the xml response.

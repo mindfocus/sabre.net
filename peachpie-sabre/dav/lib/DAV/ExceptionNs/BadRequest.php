@@ -2,20 +2,21 @@
 
 declare(strict_types=1);
 
-namespace Sabre\DAV\Exception;
+namespace Sabre\DAV\ExceptionNs;
 
 use Sabre\DAV;
 
 /**
- * NotImplemented.
+ * BadRequest.
  *
- * This exception is thrown when the client tried to call an unsupported HTTP method or other feature
+ * The BadRequest is thrown when the user submitted an invalid HTTP request
+ * BadRequest
  *
  * @copyright Copyright (C) fruux GmbH (https://fruux.com/)
  * @author Evert Pot (http://evertpot.com/)
  * @license http://sabre.io/license/ Modified BSD License
  */
-class NotImplemented extends DAV\Exception
+class BadRequest extends DAV\Exception
 {
     /**
      * Returns the HTTP statuscode for this exception.
@@ -24,6 +25,6 @@ class NotImplemented extends DAV\Exception
      */
     public function getHTTPCode()
     {
-        return 501;
+        return 400;
     }
 }

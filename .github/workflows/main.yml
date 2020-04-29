@@ -17,7 +17,7 @@ jobs:
         run: dotnet new -i Peachpie.Templates::*
       - name: Build
         run: dotnet build peachpie-sabre/sabre.net.sln
-      - name: Pack
-        run: dotnet Pack peachpie-sabre/sabre.net.sln
+      # - name: Pack
+      #  run: dotnet Pack peachpie-sabre/sabre.net.sln
       - name: publish to nuget
         run: dotnet nuget push peachpie-sabre/bin/Debug/sabre.net.1.0.0.nupkg -k  ${{secrets.NUGET_KEY}} -s https://api.nuget.org/v3/index.json

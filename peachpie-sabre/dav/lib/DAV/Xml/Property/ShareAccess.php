@@ -1,10 +1,10 @@
 <?php
 
-declare(strict_types=1);
+
 
 namespace Sabre\DAV\Xml\Property;
 
-use Sabre\DAV\Exception\BadRequest;
+use Sabre\DAV\ExceptionNs\BadRequest;
 use Sabre\DAV\Sharing\Plugin as SharingPlugin;
 use Sabre\Xml\Element;
 use Sabre\Xml\Reader;

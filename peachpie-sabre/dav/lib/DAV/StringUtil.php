@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+
 
 namespace Sabre\DAV;
 
@@ -47,7 +47,7 @@ class StringUtil
                 break;
 
             default:
-                throw new Exception\BadRequest('Collation type: '.$collation.' is not supported');
+                throw new ExceptionNs\BadRequest('Collation type: '.$collation.' is not supported');
         }
 
         switch ($matchType) {
@@ -60,7 +60,7 @@ class StringUtil
             case 'ends-with':
                 return strrpos($haystack, $needle) === strlen($haystack) - strlen($needle);
             default:
-                throw new Exception\BadRequest('Match-type: '.$matchType.' is not supported');
+                throw new ExceptionNs\BadRequest('Match-type: '.$matchType.' is not supported');
         }
     }
 

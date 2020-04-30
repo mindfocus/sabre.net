@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+
 
 namespace Sabre\CardDAV;
 
@@ -66,7 +66,7 @@ class AddressBookHome extends DAV\Collection implements DAV\IExtendedCollection,
      */
     public function setName($name)
     {
-        throw new DAV\Exception\MethodNotAllowed();
+        throw new DAV\ExceptionNs\MethodNotAllowed();
     }
 
     /**
@@ -74,7 +74,7 @@ class AddressBookHome extends DAV\Collection implements DAV\IExtendedCollection,
      */
     public function delete()
     {
-        throw new DAV\Exception\MethodNotAllowed();
+        throw new DAV\ExceptionNs\MethodNotAllowed();
     }
 
     /**
@@ -97,7 +97,7 @@ class AddressBookHome extends DAV\Collection implements DAV\IExtendedCollection,
      */
     public function createFile($filename, $data = null)
     {
-        throw new DAV\Exception\MethodNotAllowed('Creating new files in this collection is not supported');
+        throw new DAV\ExceptionNs\MethodNotAllowed('Creating new files in this collection is not supported');
     }
 
     /**
@@ -109,7 +109,7 @@ class AddressBookHome extends DAV\Collection implements DAV\IExtendedCollection,
      */
     public function createDirectory($filename)
     {
-        throw new DAV\Exception\MethodNotAllowed('Creating new collections in this collection is not supported');
+        throw new DAV\ExceptionNs\MethodNotAllowed('Creating new collections in this collection is not supported');
     }
 
     /**
@@ -128,7 +128,7 @@ class AddressBookHome extends DAV\Collection implements DAV\IExtendedCollection,
                 return $child;
             }
         }
-        throw new DAV\Exception\NotFound('Addressbook with name \''.$name.'\' could not be found');
+        throw new DAV\ExceptionNs\NotFound('Addressbook with name \''.$name.'\' could not be found');
     }
 
     /**
@@ -157,7 +157,7 @@ class AddressBookHome extends DAV\Collection implements DAV\IExtendedCollection,
     public function createExtendedCollection($name, MkCol $mkCol)
     {
         if (!$mkCol->hasResourceType('{'.Plugin::NS_CARDDAV.'}addressbook')) {
-            throw new DAV\Exception\InvalidResourceType('Unknown resourceType for this collection');
+            throw new DAV\ExceptionNs\InvalidResourceType('Unknown resourceType for this collection');
         }
         $properties = $mkCol->getRemainingValues();
         $mkCol->setRemainingResultCode(201);

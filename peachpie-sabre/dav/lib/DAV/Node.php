@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+
 
 namespace Sabre\DAV;
 
@@ -34,7 +34,7 @@ abstract class Node implements INode
      */
     public function delete()
     {
-        throw new Exception\Forbidden('Permission denied to delete node');
+        throw new ExceptionNs\Forbidden('Permission denied to delete node');
     }
 
     /**
@@ -46,6 +46,6 @@ abstract class Node implements INode
      */
     public function setName($name)
     {
-        throw new Exception\Forbidden('Permission denied to rename file');
+        throw new ExceptionNs\Forbidden('Permission denied to rename file');
     }
 }

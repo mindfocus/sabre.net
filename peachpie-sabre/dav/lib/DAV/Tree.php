@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+
 
 namespace Sabre\DAV;
 
@@ -73,7 +73,7 @@ class Tree
             $parent = $this->getNodeForPath($parentName);
 
             if (!($parent instanceof ICollection)) {
-                throw new Exception\NotFound('Could not find node at path: '.$path);
+                throw new ExceptionNs\NotFound('Could not find node at path: '.$path);
             }
             $node = $parent->getChild($baseName);
         }
@@ -109,7 +109,7 @@ class Tree
             }
 
             return $parentNode->childExists($base);
-        } catch (Exception\NotFound $e) {
+        } catch (ExceptionNs\NotFound $e) {
             return false;
         }
     }

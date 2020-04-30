@@ -1,11 +1,11 @@
 <?php
 
-declare(strict_types=1);
+
 
 namespace Sabre\CalDAV\Xml\Request;
 
 use Sabre\CalDAV\Plugin;
-use Sabre\DAV\Exception\BadRequest;
+use Sabre\DAV\ExceptionNs\BadRequest;
 use Sabre\Xml\Reader;
 use Sabre\Xml\XmlDeserializable;
 

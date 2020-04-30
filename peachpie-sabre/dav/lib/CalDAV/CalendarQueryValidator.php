@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+
 
 namespace Sabre\CalDAV;
 
@@ -323,7 +323,7 @@ class CalendarQueryValidator
 
                 // no break
             case 'VFREEBUSY':
-                throw new \Sabre\DAV\Exception\NotImplemented('time-range filters are currently not supported on '.$component->name.' components');
+                throw new \Sabre\DAV\ExceptionNs\NotImplemented('time-range filters are currently not supported on '.$component->name.' components');
             case 'COMPLETED':
             case 'CREATED':
             case 'DTEND':
@@ -334,7 +334,7 @@ class CalendarQueryValidator
                 return $start <= $component->getDateTime() && $end >= $component->getDateTime();
 
             default:
-                throw new \Sabre\DAV\Exception\BadRequest('You cannot create a time-range filter on a '.$component->name.' component');
+                throw new \Sabre\DAV\ExceptionNs\BadRequest('You cannot create a time-range filter on a '.$component->name.' component');
         }
     }
 }

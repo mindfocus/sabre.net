@@ -1,13 +1,13 @@
 <?php
 
-declare(strict_types=1);
+
 
 namespace Sabre\CalDAV;
 
 use DateTimeZone;
 use Sabre\CalDAV\Xml\Request\CalendarMultiGetReport;
 use Sabre\DAV;
-use Sabre\DAV\Exception\BadRequest;
+use Sabre\DAV\ExceptionNs\BadRequest;
 use Sabre\DAV\INode;
 use Sabre\DAV\MkCol;
 use Sabre\DAV\Xml\Property\LocalHref;
@@ -645,7 +645,7 @@ class Plugin extends DAV\ServerPlugin
 
         $calendar = $this->server->tree->getNodeForPath($uri);
         if (!$calendar instanceof ICalendar) {
-            throw new DAV\Exception\NotImplemented('The free-busy-query REPORT is only implemented on calendars');
+            throw new DAV\ExceptionNs\NotImplemented('The free-busy-query REPORT is only implemented on calendars');
         }
 
         $tzProp = '{'.self::NS_CALDAV.'}calendar-timezone';
@@ -803,11 +803,11 @@ class Plugin extends DAV\ServerPlugin
                 $vobj = VObject\Reader::read($data);
             }
         } catch (VObject\ParseException $e) {
-            throw new DAV\Exception\UnsupportedMediaType('This resource only supports valid iCalendar 2.0 data. Parse error: '.$e->getMessage());
+            throw new DAV\ExceptionNs\UnsupportedMediaType('This resource only supports valid iCalendar 2.0 data. Parse error: '.$e->getMessage());
         }
 
         if ('VCALENDAR' !== $vobj->name) {
-            throw new DAV\Exception\UnsupportedMediaType('This collection can only support iCalendar objects.');
+            throw new DAV\ExceptionNs\UnsupportedMediaType('This collection can only support iCalendar objects.');
         }
 
         $sCCS = '{urn:ietf:params:xml:ns:caldav}supported-calendar-component-set';
@@ -870,7 +870,7 @@ class Plugin extends DAV\ServerPlugin
                     break;
                 case 3:
                     // Level 3 means a critical error
-                    throw new DAV\Exception\UnsupportedMediaType('Validation error in iCalendar: '.$message['message']);
+                    throw new DAV\ExceptionNs\UnsupportedMediaType('Validation error in iCalendar: '.$message['message']);
             }
         }
         if ($warningMessage) {

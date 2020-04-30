@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+
 
 namespace Sabre\CalDAV\Principal;
 
@@ -30,7 +30,7 @@ class User extends DAVACL\Principal implements DAV\ICollection
      */
     public function createFile($name, $data = null)
     {
-        throw new DAV\Exception\Forbidden('Permission denied to create file (filename '.$name.')');
+        throw new DAV\ExceptionNs\Forbidden('Permission denied to create file (filename '.$name.')');
     }
 
     /**
@@ -42,7 +42,7 @@ class User extends DAVACL\Principal implements DAV\ICollection
      */
     public function createDirectory($name)
     {
-        throw new DAV\Exception\Forbidden('Permission denied to create directory');
+        throw new DAV\ExceptionNs\Forbidden('Permission denied to create directory');
     }
 
     /**

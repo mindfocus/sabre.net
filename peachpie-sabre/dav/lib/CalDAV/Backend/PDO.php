@@ -1,12 +1,12 @@
 <?php
 
-declare(strict_types=1);
+
 
 namespace Sabre\CalDAV\Backend;
 
 use Sabre\CalDAV;
 use Sabre\DAV;
-use Sabre\DAV\Exception\Forbidden;
+use Sabre\DAV\ExceptionNs\Forbidden;
 use Sabre\DAV\Xml\Element\Sharee;
 use Sabre\VObject;
 
@@ -629,7 +629,7 @@ SQL
             }
         }
         if (!$componentType) {
-            throw new \Sabre\DAV\Exception\BadRequest('Calendar objects must have a VJOURNAL, VEVENT or VTODO component');
+            throw new \Sabre\DAV\ExceptionNs\BadRequest('Calendar objects must have a VJOURNAL, VEVENT or VTODO component');
         }
         if ('VEVENT' === $componentType) {
             $firstOccurence = $component->DTSTART->getDateTime()->getTimeStamp();
@@ -1458,6 +1458,6 @@ SQL;
      */
     public function setPublishStatus($calendarId, $value)
     {
-        throw new DAV\Exception\NotImplemented('Not implemented');
+        throw new DAV\ExceptionNs\NotImplemented('Not implemented');
     }
 }

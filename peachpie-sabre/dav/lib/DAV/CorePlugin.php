@@ -1,10 +1,10 @@
 <?php
 
-declare(strict_types=1);
+
 
 namespace Sabre\DAV;
 
-use Sabre\DAV\Exception\BadRequest;
+use Sabre\DAV\ExceptionNs\BadRequest;
 use Sabre\HTTP\RequestInterface;
 use Sabre\HTTP\ResponseInterface;
 use Sabre\Xml\ParseException;
@@ -156,10 +156,10 @@ class CorePlugin extends ServerPlugin
                 $start = $range[0];
                 $end = $range[1] ? $range[1] : $nodeSize - 1;
                 if ($start >= $nodeSize) {
-                    throw new Exception\RequestedRangeNotSatisfiable('The start offset ('.$range[0].') exceeded the size of the entity ('.$nodeSize.')');
+                    throw new ExceptionNs\RequestedRangeNotSatisfiable('The start offset ('.$range[0].') exceeded the size of the entity ('.$nodeSize.')');
                 }
                 if ($end < $start) {
-                    throw new Exception\RequestedRangeNotSatisfiable('The end offset ('.$range[1].') is lower than the start offset ('.$range[0].')');
+                    throw new ExceptionNs\RequestedRangeNotSatisfiable('The end offset ('.$range[1].') is lower than the start offset ('.$range[0].')');
                 }
                 if ($end >= $nodeSize) {
                     $end = $nodeSize - 1;
@@ -180,7 +180,7 @@ class CorePlugin extends ServerPlugin
                 $consumeBlock = 8192;
                 for ($consumed = 0; $start - $consumed > 0;) {
                     if (feof($body)) {
-                        throw new Exception\RequestedRangeNotSatisfiable('The start offset ('.$start.') exceeded the size of the entity ('.$consumed.')');
+                        throw new ExceptionNs\RequestedRangeNotSatisfiable('The start offset ('.$start.') exceeded the size of the entity ('.$consumed.')');
                     }
                     $consumed += strlen(fread($body, min($start - $consumed, $consumeBlock)));
                 }
@@ -249,7 +249,7 @@ class CorePlugin extends ServerPlugin
 
         try {
             $this->server->invokeMethod($subRequest, $response, false);
-        } catch (Exception\NotImplemented $e) {
+        } catch (ExceptionNs\NotImplemented $e) {
             // Some clients may do HEAD requests on collections, however, GET
             // requests and HEAD requests _may_ not be defined on a collection,
             // which would trigger a 501.
@@ -439,7 +439,7 @@ class CorePlugin extends ServerPlugin
 
                Reference: http://tools.ietf.org/html/rfc7231#section-4.3.4
             */
-            throw new Exception\BadRequest('Content-Range on PUT requests are forbidden.');
+            throw new ExceptionNs\BadRequest('Content-Range on PUT requests are forbidden.');
         }
 
         // Intercepting the Finder problem
@@ -468,7 +468,7 @@ class CorePlugin extends ServerPlugin
             // Only reading first byte
             $firstByte = fread($body, 1);
             if (1 !== strlen($firstByte)) {
-                throw new Exception\Forbidden('This server is not compatible with OS/X finder. Consider using a different WebDAV client or webserver.');
+                throw new ExceptionNs\Forbidden('This server is not compatible with OS/X finder. Consider using a different WebDAV client or webserver.');
             }
 
             // The body needs to stay intact, so we copy everything to a
@@ -487,7 +487,7 @@ class CorePlugin extends ServerPlugin
 
             // If the node is a collection, we'll deny it
             if (!($node instanceof IFile)) {
-                throw new Exception\Conflict('PUT is not allowed on non-files.');
+                throw new ExceptionNs\Conflict('PUT is not allowed on non-files.');
             }
             if (!$this->server->updateFile($path, $body, $etag)) {
                 return false;
@@ -534,19 +534,19 @@ class CorePlugin extends ServerPlugin
             $contentType = $request->getHeader('Content-Type');
             if (null === $contentType || (0 !== strpos($contentType, 'application/xml') && 0 !== strpos($contentType, 'text/xml'))) {
                 // We must throw 415 for unsupported mkcol bodies
-                throw new Exception\UnsupportedMediaType('The request body for the MKCOL request must have an xml Content-Type');
+                throw new ExceptionNs\UnsupportedMediaType('The request body for the MKCOL request must have an xml Content-Type');
             }
 
             try {
                 $mkcol = $this->server->xml->expect('{DAV:}mkcol', $requestBody);
             } catch (\Sabre\Xml\ParseException $e) {
-                throw new Exception\BadRequest($e->getMessage(), 0, $e);
+                throw new ExceptionNs\BadRequest($e->getMessage(), 0, $e);
             }
 
             $properties = $mkcol->getProperties();
 
             if (!isset($properties['{DAV:}resourcetype'])) {
-                throw new Exception\BadRequest('The mkcol request must include a {DAV:}resourcetype property');
+                throw new ExceptionNs\BadRequest('The mkcol request must include a {DAV:}resourcetype property');
             }
             $resourceType = $properties['{DAV:}resourcetype']->getValue();
             unset($properties['{DAV:}resourcetype']);
@@ -684,7 +684,7 @@ class CorePlugin extends ServerPlugin
 
         if ($this->server->emit('report', [$rootElementName, $result, $path])) {
             // If emit returned true, it means the report was not supported
-            throw new Exception\ReportNotSupported();
+            throw new ExceptionNs\ReportNotSupported();
         }
 
         // Sending back false will interrupt the event chain and tell the server

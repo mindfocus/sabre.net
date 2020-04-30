@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+
 
 namespace Sabre\DAV\FSExt;
 
@@ -45,7 +45,7 @@ class Directory extends Node implements DAV\ICollection, DAV\IQuota, DAV\IMoveTa
     {
         // We're not allowing dots
         if ('.' == $name || '..' == $name) {
-            throw new DAV\Exception\Forbidden('Permission denied to . and ..');
+            throw new DAV\ExceptionNs\Forbidden('Permission denied to . and ..');
         }
         $newPath = $this->path.'/'.$name;
         file_put_contents($newPath, $data);
@@ -67,7 +67,7 @@ class Directory extends Node implements DAV\ICollection, DAV\IQuota, DAV\IMoveTa
     {
         // We're not allowing dots
         if ('.' == $name || '..' == $name) {
-            throw new DAV\Exception\Forbidden('Permission denied to . and ..');
+            throw new DAV\ExceptionNs\Forbidden('Permission denied to . and ..');
         }
         $newPath = $this->path.'/'.$name;
         mkdir($newPath);
@@ -91,10 +91,10 @@ class Directory extends Node implements DAV\ICollection, DAV\IQuota, DAV\IMoveTa
         $path = $this->path.'/'.$name;
 
         if (!file_exists($path)) {
-            throw new DAV\Exception\NotFound('File could not be located');
+            throw new DAV\ExceptionNs\NotFound('File could not be located');
         }
         if ('.' == $name || '..' == $name) {
-            throw new DAV\Exception\Forbidden('Permission denied to . and ..');
+            throw new DAV\ExceptionNs\Forbidden('Permission denied to . and ..');
         }
         if (is_dir($path)) {
             return new self($path);

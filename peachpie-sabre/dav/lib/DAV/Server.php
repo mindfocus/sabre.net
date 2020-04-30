@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+
 
 namespace Sabre\DAV;
 
@@ -474,7 +474,7 @@ class Server implements LoggerAwareInterface, EmitterInterface
             }
 
             // Unsupported method
-            throw new Exception\NotImplemented($exMessage);
+            throw new ExceptionNs\NotImplemented($exMessage);
         }
 
         if (!$this->emit('afterMethod:'.$method, [$request, $response])) {
@@ -571,7 +571,7 @@ class Server implements LoggerAwareInterface, EmitterInterface
         } elseif ($uri.'/' === $baseUri) {
             return '';
         } else {
-            throw new Exception\Forbidden('Requested uri ('.$uri.') is out of base uri ('.$this->getBaseUri().')');
+            throw new ExceptionNs\Forbidden('Requested uri ('.$uri.') is out of base uri ('.$this->getBaseUri().')');
         }
     }
 
@@ -720,7 +720,7 @@ class Server implements LoggerAwareInterface, EmitterInterface
     {
         // Collecting the relevant HTTP headers
         if (!$request->getHeader('Destination')) {
-            throw new Exception\BadRequest('The destination header was not supplied');
+            throw new ExceptionNs\BadRequest('The destination header was not supplied');
         }
         $destination = $this->calculateUri($request->getHeader('Destination'));
         $overwrite = $request->getHeader('Overwrite');
@@ -734,18 +734,18 @@ class Server implements LoggerAwareInterface, EmitterInterface
         }
         // We need to throw a bad request exception, if the header was invalid
         else {
-            throw new Exception\BadRequest('The HTTP Overwrite header should be either T or F');
+            throw new ExceptionNs\BadRequest('The HTTP Overwrite header should be either T or F');
         }
         list($destinationDir) = Uri\split($destination);
 
         try {
             $destinationParent = $this->tree->getNodeForPath($destinationDir);
             if (!($destinationParent instanceof ICollection)) {
-                throw new Exception\UnsupportedMediaType('The destination node is not a collection');
+                throw new ExceptionNs\UnsupportedMediaType('The destination node is not a collection');
             }
-        } catch (Exception\NotFound $e) {
+        } catch (ExceptionNs\NotFound $e) {
             // If the destination parent node is not found, we throw a 409
-            throw new Exception\Conflict('The destination node is not found');
+            throw new ExceptionNs\Conflict('The destination node is not found');
         }
 
         try {
@@ -754,19 +754,19 @@ class Server implements LoggerAwareInterface, EmitterInterface
             // If this succeeded, it means the destination already exists
             // we'll need to throw precondition failed in case overwrite is false
             if (!$overwrite) {
-                throw new Exception\PreconditionFailed('The destination node already exists, and the overwrite header is set to false', 'Overwrite');
+                throw new ExceptionNs\PreconditionFailed('The destination node already exists, and the overwrite header is set to false', 'Overwrite');
             }
-        } catch (Exception\NotFound $e) {
+        } catch (ExceptionNs\NotFound $e) {
             // Destination didn't exist, we're all good
             $destinationNode = false;
         }
 
         $requestPath = $request->getPath();
         if ($destination === $requestPath) {
-            throw new Exception\Forbidden('Source and destination uri are identical.');
+            throw new ExceptionNs\Forbidden('Source and destination uri are identical.');
         }
         if (substr($destination, 0, strlen($requestPath) + 1) === $requestPath.'/') {
-            throw new Exception\Conflict('The destination may not be part of the same subtree as the source path.');
+            throw new ExceptionNs\Conflict('The destination may not be part of the same subtree as the source path.');
         }
 
         // These are the three relevant properties we need to return
@@ -1160,13 +1160,13 @@ class Server implements LoggerAwareInterface, EmitterInterface
         // Making sure the parent exists
         try {
             $parent = $this->tree->getNodeForPath($parentUri);
-        } catch (Exception\NotFound $e) {
-            throw new Exception\Conflict('Parent node does not exist');
+        } catch (ExceptionNs\NotFound $e) {
+            throw new ExceptionNs\Conflict('Parent node does not exist');
         }
 
         // Making sure the parent is a collection
         if (!$parent instanceof ICollection) {
-            throw new Exception\Conflict('Parent node is not a collection');
+            throw new ExceptionNs\Conflict('Parent node is not a collection');
         }
 
         // Making sure the child does not already exist
@@ -1174,8 +1174,8 @@ class Server implements LoggerAwareInterface, EmitterInterface
             $parent->getChild($newName);
 
             // If we got here.. it means there's already a node on that url, and we need to throw a 405
-            throw new Exception\MethodNotAllowed('The resource you tried to create already exists');
-        } catch (Exception\NotFound $e) {
+            throw new ExceptionNs\MethodNotAllowed('The resource you tried to create already exists');
+        } catch (ExceptionNs\NotFound $e) {
             // NotFound is the expected behavior.
         }
 
@@ -1197,7 +1197,7 @@ class Server implements LoggerAwareInterface, EmitterInterface
              * MKCOL operation that carries extra resourcetypes.
              */
             if (count($mkCol->getResourceType()) > 1) {
-                throw new Exception\InvalidResourceType('The {DAV:}resourcetype you specified is not supported here.');
+                throw new ExceptionNs\InvalidResourceType('The {DAV:}resourcetype you specified is not supported here.');
             }
 
             $parent->createDirectory($newName);
@@ -1292,8 +1292,8 @@ class Server implements LoggerAwareInterface, EmitterInterface
             // request succeed if a resource exists at that url.
             try {
                 $node = $this->tree->getNodeForPath($path);
-            } catch (Exception\NotFound $e) {
-                throw new Exception\PreconditionFailed('An If-Match header was specified and the resource did not exist', 'If-Match');
+            } catch (ExceptionNs\NotFound $e) {
+                throw new ExceptionNs\PreconditionFailed('An If-Match header was specified and the resource did not exist', 'If-Match');
             }
 
             // Only need to check entity tags if they are not *
@@ -1320,7 +1320,7 @@ class Server implements LoggerAwareInterface, EmitterInterface
                     if ($etag) {
                         $response->setHeader('ETag', $etag);
                     }
-                    throw new Exception\PreconditionFailed('An If-Match header was specified, but none of the specified ETags matched.', 'If-Match');
+                    throw new ExceptionNs\PreconditionFailed('An If-Match header was specified, but none of the specified ETags matched.', 'If-Match');
                 }
             }
         }
@@ -1334,7 +1334,7 @@ class Server implements LoggerAwareInterface, EmitterInterface
             if (!$node) {
                 try {
                     $node = $this->tree->getNodeForPath($path);
-                } catch (Exception\NotFound $e) {
+                } catch (ExceptionNs\NotFound $e) {
                     $nodeExists = false;
                 }
             }
@@ -1366,7 +1366,7 @@ class Server implements LoggerAwareInterface, EmitterInterface
 
                         return false;
                     } else {
-                        throw new Exception\PreconditionFailed('An If-None-Match header was specified, but the ETag matched (or * was specified).', 'If-None-Match');
+                        throw new ExceptionNs\PreconditionFailed('An If-None-Match header was specified, but the ETag matched (or * was specified).', 'If-None-Match');
                     }
                 }
             }
@@ -1412,7 +1412,7 @@ class Server implements LoggerAwareInterface, EmitterInterface
                 if ($lastMod) {
                     $lastMod = new \DateTime('@'.$lastMod);
                     if ($lastMod > $date) {
-                        throw new Exception\PreconditionFailed('An If-Unmodified-Since header was specified, but the entity has been changed since the specified date.', 'If-Unmodified-Since');
+                        throw new ExceptionNs\PreconditionFailed('An If-Unmodified-Since header was specified, but the entity has been changed since the specified date.', 'If-Unmodified-Since');
                     }
                 }
             }
@@ -1472,7 +1472,7 @@ class Server implements LoggerAwareInterface, EmitterInterface
 
             // If we ended here, it means there was no valid ETag + token
             // combination found for the current condition. This means we fail!
-            throw new Exception\PreconditionFailed('Failed to find a valid token/etag combination for '.$uri, 'If');
+            throw new ExceptionNs\PreconditionFailed('Failed to find a valid token/etag combination for '.$uri, 'If');
         }
 
         return true;

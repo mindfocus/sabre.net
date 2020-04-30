@@ -1,11 +1,11 @@
 <?php
 
-declare(strict_types=1);
+
 
 namespace Sabre\DAV\Sharing;
 
-use Sabre\DAV\Exception\BadRequest;
-use Sabre\DAV\Exception\Forbidden;
+use Sabre\DAV\ExceptionNs\BadRequest;
+use Sabre\DAV\ExceptionNs\Forbidden;
 use Sabre\DAV\INode;
 use Sabre\DAV\PropFind;
 use Sabre\DAV\Server;

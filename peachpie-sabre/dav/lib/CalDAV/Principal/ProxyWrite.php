@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+
 
 namespace Sabre\CalDAV\Principal;
 
@@ -70,7 +70,7 @@ class ProxyWrite implements IProxyWrite
      */
     public function delete()
     {
-        throw new DAV\Exception\Forbidden('Permission denied to delete node');
+        throw new DAV\ExceptionNs\Forbidden('Permission denied to delete node');
     }
 
     /**
@@ -82,7 +82,7 @@ class ProxyWrite implements IProxyWrite
      */
     public function setName($name)
     {
-        throw new DAV\Exception\Forbidden('Permission denied to rename file');
+        throw new DAV\ExceptionNs\Forbidden('Permission denied to rename file');
     }
 
     /**

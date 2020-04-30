@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+
 
 namespace Sabre\CalDAV;
 
@@ -192,7 +192,7 @@ class SharingPlugin extends DAV\ServerPlugin
         // Making sure the node exists
         try {
             $node = $this->server->tree->getNodeForPath($path);
-        } catch (DAV\Exception\NotFound $e) {
+        } catch (DAV\ExceptionNs\NotFound $e) {
             return;
         }
 

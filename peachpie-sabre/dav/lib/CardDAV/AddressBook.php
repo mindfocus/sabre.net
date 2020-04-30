@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+
 
 namespace Sabre\CardDAV;
 
@@ -64,7 +64,7 @@ class AddressBook extends DAV\Collection implements IAddressBook, DAV\IPropertie
     {
         $obj = $this->carddavBackend->getCard($this->addressBookInfo['id'], $name);
         if (!$obj) {
-            throw new DAV\Exception\NotFound('Card not found');
+            throw new DAV\ExceptionNs\NotFound('Card not found');
         }
 
         return new Card($this->carddavBackend, $this->addressBookInfo, $obj);
@@ -118,7 +118,7 @@ class AddressBook extends DAV\Collection implements IAddressBook, DAV\IPropertie
      */
     public function createDirectory($name)
     {
-        throw new DAV\Exception\MethodNotAllowed('Creating collections in addressbooks is not allowed');
+        throw new DAV\ExceptionNs\MethodNotAllowed('Creating collections in addressbooks is not allowed');
     }
 
     /**
@@ -159,7 +159,7 @@ class AddressBook extends DAV\Collection implements IAddressBook, DAV\IPropertie
      */
     public function setName($newName)
     {
-        throw new DAV\Exception\MethodNotAllowed('Renaming addressbooks is not yet supported');
+        throw new DAV\ExceptionNs\MethodNotAllowed('Renaming addressbooks is not yet supported');
     }
 
     /**

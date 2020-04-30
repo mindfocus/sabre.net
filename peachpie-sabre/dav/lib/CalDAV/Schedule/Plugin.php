@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+
 
 namespace Sabre\CalDAV\Schedule;
 
@@ -934,7 +934,7 @@ class Plugin extends ServerPlugin
             $caldavNS.'calendar-availability'
         );
 
-        $vcalendar = new VObject\Component\VCalendar();
+        $vcalendar = new VObject\ComponentNs\VCalendar();
         $vcalendar->METHOD = 'REPLY';
 
         $generator = new VObject\FreeBusyGenerator();

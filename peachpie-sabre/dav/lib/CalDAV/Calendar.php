@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+
 
 namespace Sabre\CalDAV;
 
@@ -177,7 +177,7 @@ class Calendar implements ICalendar, DAV\IProperties, DAV\Sync\ISyncCollection, 
      */
     public function createDirectory($name)
     {
-        throw new DAV\Exception\MethodNotAllowed('Creating collections in calendar objects is not allowed');
+        throw new DAV\ExceptionNs\MethodNotAllowed('Creating collections in calendar objects is not allowed');
     }
 
     /**
@@ -215,7 +215,7 @@ class Calendar implements ICalendar, DAV\IProperties, DAV\Sync\ISyncCollection, 
      */
     public function setName($newName)
     {
-        throw new DAV\Exception\MethodNotAllowed('Renaming calendars is not yet supported');
+        throw new DAV\ExceptionNs\MethodNotAllowed('Renaming calendars is not yet supported');
     }
 
     /**

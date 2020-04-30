@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+
 
 namespace Sabre\CalDAV;
 
@@ -235,7 +235,7 @@ class CalendarHome implements DAV\IExtendedCollection, DAVACL\IACL
                     $isSubscription = true;
                     break;
                 default:
-                    throw new DAV\Exception\InvalidResourceType('Unknown resourceType: '.$rt);
+                    throw new DAV\ExceptionNs\InvalidResourceType('Unknown resourceType: '.$rt);
             }
         }
 
@@ -244,13 +244,13 @@ class CalendarHome implements DAV\IExtendedCollection, DAVACL\IACL
 
         if ($isSubscription) {
             if (!$this->caldavBackend instanceof Backend\SubscriptionSupport) {
-                throw new DAV\Exception\InvalidResourceType('This backend does not support subscriptions');
+                throw new DAV\ExceptionNs\InvalidResourceType('This backend does not support subscriptions');
             }
             $this->caldavBackend->createSubscription($this->principalInfo['uri'], $name, $properties);
         } elseif ($isCalendar) {
             $this->caldavBackend->createCalendar($this->principalInfo['uri'], $name, $properties);
         } else {
-            throw new DAV\Exception\InvalidResourceType('You can only create calendars and subscriptions in this collection');
+            throw new DAV\ExceptionNs\InvalidResourceType('You can only create calendars and subscriptions in this collection');
         }
     }
 
@@ -324,7 +324,7 @@ class CalendarHome implements DAV\IExtendedCollection, DAVACL\IACL
     public function shareReply($href, $status, $calendarUri, $inReplyTo, $summary = null)
     {
         if (!$this->caldavBackend instanceof Backend\SharingSupport) {
-            throw new DAV\Exception\NotImplemented('Sharing support is not implemented by this backend.');
+            throw new DAV\ExceptionNs\NotImplemented('Sharing support is not implemented by this backend.');
         }
 
         return $this->caldavBackend->shareReply($href, $status, $calendarUri, $inReplyTo, $summary);

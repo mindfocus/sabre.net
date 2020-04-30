@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+
 
 namespace Sabre\DAV\PartialUpdate;
 
@@ -112,13 +112,13 @@ class Plugin extends DAV\ServerPlugin
         // Get the node. Will throw a 404 if not found
         $node = $this->server->tree->getNodeForPath($path);
         if (!$node instanceof IPatchSupport) {
-            throw new DAV\Exception\MethodNotAllowed('The target resource does not support the PATCH method.');
+            throw new DAV\ExceptionNs\MethodNotAllowed('The target resource does not support the PATCH method.');
         }
 
         $range = $this->getHTTPUpdateRange($request);
 
         if (!$range) {
-            throw new DAV\Exception\BadRequest('No valid "X-Update-Range" found in the headers');
+            throw new DAV\ExceptionNs\BadRequest('No valid "X-Update-Range" found in the headers');
         }
 
         $contentType = strtolower(
@@ -126,12 +126,12 @@ class Plugin extends DAV\ServerPlugin
         );
 
         if ('application/x-sabredav-partialupdate' != $contentType) {
-            throw new DAV\Exception\UnsupportedMediaType('Unknown Content-Type header "'.$contentType.'"');
+            throw new DAV\ExceptionNs\UnsupportedMediaType('Unknown Content-Type header "'.$contentType.'"');
         }
 
         $len = $this->server->httpRequest->getHeader('Content-Length');
         if (!$len) {
-            throw new DAV\Exception\LengthRequired('A Content-Length header is required');
+            throw new DAV\ExceptionNs\LengthRequired('A Content-Length header is required');
         }
         switch ($range[0]) {
             case self::RANGE_START:
@@ -140,10 +140,10 @@ class Plugin extends DAV\ServerPlugin
                     $range[2] = $range[1] + $len - 1;
                 } else {
                     if ($range[2] < $range[1]) {
-                        throw new DAV\Exception\RequestedRangeNotSatisfiable('The end offset ('.$range[2].') is lower than the start offset ('.$range[1].')');
+                        throw new DAV\ExceptionNs\RequestedRangeNotSatisfiable('The end offset ('.$range[2].') is lower than the start offset ('.$range[1].')');
                     }
                     if ($range[2] - $range[1] + 1 != $len) {
-                        throw new DAV\Exception\RequestedRangeNotSatisfiable('Actual data length ('.$len.') is not consistent with begin ('.$range[1].') and end ('.$range[2].') offsets');
+                        throw new DAV\ExceptionNs\RequestedRangeNotSatisfiable('Actual data length ('.$len.') is not consistent with begin ('.$range[1].') and end ('.$range[2].') offsets');
                     }
                 }
                 break;

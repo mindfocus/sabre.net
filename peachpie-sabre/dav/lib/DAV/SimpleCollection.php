@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+
 
 namespace Sabre\DAV;
 
@@ -94,7 +94,7 @@ class SimpleCollection extends Collection
         if (isset($this->children[$name])) {
             return $this->children[$name];
         }
-        throw new Exception\NotFound('File not found: '.$name.' in \''.$this->getName().'\'');
+        throw new ExceptionNs\NotFound('File not found: '.$name.' in \''.$this->getName().'\'');
     }
 
     /**

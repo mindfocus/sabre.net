@@ -9,32 +9,32 @@ namespace NUnit.Framework
     /// A simple ExpectedExceptionAttribute
     /// </summary>
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
-    public class ExpectedExceptionAttribute : NUnitAttribute, IWrapTestMethod
+    public class ExpectedExceptionMessageAttribute : NUnitAttribute, IWrapTestMethod
     {
-        private readonly Type _expectedExceptionType;
-        public ExpectedExceptionAttribute(Type type)
+        private readonly string _expectedExceptionMessage;
+        public ExpectedExceptionMessageAttribute(string expectedExceptionMessage)
         {
-            _expectedExceptionType = type;
+            _expectedExceptionMessage = expectedExceptionMessage;
         }
 
         public TestCommand Wrap(TestCommand command)
         {
-            return new ExpectedExceptionCommand(command, _expectedExceptionType);
+            return new ExpectedExceptionCommand(command, _expectedExceptionMessage);
         }
 
         private class ExpectedExceptionCommand : DelegatingTestCommand
         {
-            private readonly Type _expectedType;
+            private readonly string _expectedExceptionMessage;
 
-            public ExpectedExceptionCommand(TestCommand innerCommand, Type expectedType)
+            public ExpectedExceptionCommand(TestCommand innerCommand, string expectedExceptionMessage)
                 : base(innerCommand)
             {
-                _expectedType = expectedType;
+                _expectedExceptionMessage = expectedExceptionMessage;
             }
 
             public override TestResult Execute(TestExecutionContext context)
             {
-                Type caughtType = null;
+                string caughtExceptionMessage = "";
                 try
                 {
                     innerCommand.Execute(context);
@@ -43,17 +43,17 @@ namespace NUnit.Framework
                 {
                     if (ex is NUnitException)
                         ex = ex.InnerException;
-                    caughtType = ex.GetType();
+                    caughtExceptionMessage = ex.Message;
                 }
 
-                if (caughtType == _expectedType)
+                if (caughtExceptionMessage == _expectedExceptionMessage)
                     context.CurrentResult.SetResult(ResultState.Success);
-                else if (caughtType != null)
+                else if (caughtExceptionMessage != "")
                     context.CurrentResult.SetResult(ResultState.Failure,
-                        string.Format("Expected {0} but got {1}", _expectedType.Name, caughtType.Name));
+                        string.Format("Expected {0} but got {1}", _expectedExceptionMessage, caughtExceptionMessage));
                 else
                     context.CurrentResult.SetResult(ResultState.Failure,
-                        string.Format("Expected {0} but no exception was thrown", _expectedType.Name));
+                        string.Format("Expected {0} but no exception was thrown", _expectedExceptionMessage));
                 return context.CurrentResult;
             }
         }

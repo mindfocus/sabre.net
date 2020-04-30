@@ -26,15 +26,15 @@ class UriFunc{
  */
 function resolve(string $basePath, string $newPath): string
 {
-    $delta = parse($newPath);
+    $delta = $this->parse($newPath);
 
     // If the new path defines a scheme, it's absolute and we can just return
     // that.
     if ($delta['scheme']) {
-        return build($delta);
+        return $this->build($delta);
     }
 
-    $base = parse($basePath);
+    $base = $this->parse($basePath);
     $pick = function ($part) use ($base, $delta) {
         if ($delta[$part]) {
             return $delta[$part];
@@ -99,7 +99,7 @@ function resolve(string $basePath, string $newPath): string
         $newParts['fragment'] = $delta['fragment'];
     }
 
-    return build($newParts);
+    return $this->build($newParts);
 }
 /**
  * Parses a URI and returns its individual components.
@@ -134,7 +134,7 @@ function parse(string $uri): array
 
     $result = parse_url($uri);
     if (!$result) {
-        $result = _parse_fallback($uri);
+        $result = $this->_parse_fallback($uri);
     }
 
     return

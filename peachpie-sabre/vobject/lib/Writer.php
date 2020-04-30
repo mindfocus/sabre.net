@@ -56,7 +56,7 @@ class Writer
 
         $writer->startDocument('1.0', 'utf-8');
 
-        if ($component instanceof Component\VCalendar) {
+        if ($component instanceof ComponentNs\VCalendar) {
             $writer->startElement('icalendar');
             $writer->writeAttribute('xmlns', Parser\XML::XCAL_NAMESPACE);
         } else {

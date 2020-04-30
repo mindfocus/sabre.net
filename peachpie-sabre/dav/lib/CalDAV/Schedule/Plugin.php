@@ -23,7 +23,7 @@ use Sabre\DAVACL;
 use Sabre\HTTP\RequestInterface;
 use Sabre\HTTP\ResponseInterface;
 use Sabre\VObject;
-use Sabre\VObject\Component\VCalendar;
+use Sabre\VObject\ComponentNs\VCalendar;
 use Sabre\VObject\ITip;
 use Sabre\VObject\ITip\Message;
 use Sabre\VObject\Reader;

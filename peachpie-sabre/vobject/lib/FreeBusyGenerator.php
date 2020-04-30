@@ -5,7 +5,7 @@ namespace Sabre\VObject;
 use DateTimeImmutable;
 use DateTimeInterface;
 use DateTimeZone;
-use Sabre\VObject\Component\VCalendar;
+use Sabre\VObject\ComponentNs\VCalendar;
 use Sabre\VObject\Recur\EventIterator;
 use Sabre\VObject\Recur\NoInstancesException;
 

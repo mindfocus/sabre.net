@@ -2,7 +2,7 @@
 
 namespace Sabre\VObject\ITip;
 
-use Sabre\VObject\Component\VCalendar;
+use Sabre\VObject\ComponentNs\VCalendar;
 use Sabre\VObject\DateTimeParser;
 use Sabre\VObject\Reader;
 use Sabre\VObject\Recur\EventIterator;

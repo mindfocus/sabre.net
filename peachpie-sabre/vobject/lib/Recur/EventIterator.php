@@ -7,7 +7,7 @@ use DateTimeInterface;
 use DateTimeZone;
 use InvalidArgumentException;
 use Sabre\VObject\Component;
-use Sabre\VObject\Component\VEvent;
+use Sabre\VObject\ComponentNs\VEvent;
 use Sabre\VObject\Settings;
 
 /**

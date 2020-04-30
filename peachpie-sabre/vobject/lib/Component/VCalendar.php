@@ -37,15 +37,15 @@ class VCalendar extends VObject\Document
      * @var array
      */
     public static $componentMap = [
-        'VCALENDAR' => 'Sabre\\VObject\\Component\\VCalendar',
-        'VALARM' => 'Sabre\\VObject\\Component\\VAlarm',
-        'VEVENT' => 'Sabre\\VObject\\Component\\VEvent',
-        'VFREEBUSY' => 'Sabre\\VObject\\Component\\VFreeBusy',
-        'VAVAILABILITY' => 'Sabre\\VObject\\Component\\VAvailability',
-        'AVAILABLE' => 'Sabre\\VObject\\Component\\Available',
-        'VJOURNAL' => 'Sabre\\VObject\\Component\\VJournal',
-        'VTIMEZONE' => 'Sabre\\VObject\\Component\\VTimeZone',
-        'VTODO' => 'Sabre\\VObject\\Component\\VTodo',
+        'VCALENDAR' => 'Sabre\\VObject\\ComponentNs\\VCalendar',
+        'VALARM' => 'Sabre\\VObject\\ComponentNs\\VAlarm',
+        'VEVENT' => 'Sabre\\VObject\\ComponentNs\\VEvent',
+        'VFREEBUSY' => 'Sabre\\VObject\\ComponentNs\\VFreeBusy',
+        'VAVAILABILITY' => 'Sabre\\VObject\\ComponentNs\\VAvailability',
+        'AVAILABLE' => 'Sabre\\VObject\\ComponentNs\\Available',
+        'VJOURNAL' => 'Sabre\\VObject\\ComponentNs\\VJournal',
+        'VTIMEZONE' => 'Sabre\\VObject\\ComponentNs\\VTimeZone',
+        'VTODO' => 'Sabre\\VObject\\ComponentNs\\VTodo',
     ];
 
     /**

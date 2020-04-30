@@ -45,7 +45,7 @@ class VCardConverter
 
         $newVersion = Document::VCARD40 === $targetVersion ? '4.0' : '3.0';
 
-        $output = new Component\VCard([
+        $output = new ComponentNs\VCard([
             'VERSION' => $newVersion,
         ]);
 

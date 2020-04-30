@@ -41,5 +41,9 @@ namespace sabre.net.tests.sabre.CalDAV
             var calendarHome = new CalendarHome(backend.Object, p);
             calendarHome.getChild("notifications");
         }
+        [Test]
+        public void testGetChildren()
+        {
+        }
     }
 }

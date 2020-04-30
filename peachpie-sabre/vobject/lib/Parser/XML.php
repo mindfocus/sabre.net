@@ -3,8 +3,8 @@
 namespace Sabre\VObject\Parser;
 
 use Sabre\VObject\Component;
-use Sabre\VObject\Component\VCalendar;
-use Sabre\VObject\Component\VCard;
+use Sabre\VObject\ComponentNs\VCalendar;
+use Sabre\VObject\ComponentNs\VCard;
 use Sabre\VObject\EofException;
 use Sabre\VObject\ParseException;
 use Sabre\Xml as SabreXml;

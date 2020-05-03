@@ -2,7 +2,7 @@
 
 
 
-namespace Sabre\DAVACL\Exception;
+namespace Sabre\DAVACL\ExceptionNs;
 
 use Sabre\DAV;
 

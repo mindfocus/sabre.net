@@ -2,7 +2,7 @@
 
 namespace Sabre\Uri;
 
-class UriFunc{
+// class UriFunc{
 /**
  * This file contains all the uri handling functions.
  *
@@ -26,15 +26,17 @@ class UriFunc{
  */
 function resolve(string $basePath, string $newPath): string
 {
-    $delta = $this->parse($newPath);
-
+    $delta = parse($newPath);
+    // $delta = $this->parse($newPath);
     // If the new path defines a scheme, it's absolute and we can just return
     // that.
     if ($delta['scheme']) {
-        return $this->build($delta);
+        return build($delta);
+        // return $this->build($delta);
     }
 
-    $base = $this->parse($basePath);
+    $base = parse($basePath);
+    // $base = $this->parse($basePath);
     $pick = function ($part) use ($base, $delta) {
         if ($delta[$part]) {
             return $delta[$part];
@@ -99,7 +101,8 @@ function resolve(string $basePath, string $newPath): string
         $newParts['fragment'] = $delta['fragment'];
     }
 
-    return $this->build($newParts);
+    return build($newParts);
+    // return $this->build($newParts);
 }
 /**
  * Parses a URI and returns its individual components.
@@ -134,7 +137,8 @@ function parse(string $uri): array
 
     $result = parse_url($uri);
     if (!$result) {
-        $result = $this->_parse_fallback($uri);
+        $result = _parse_fallback($uri);
+        // $result = $this->_parse_fallback($uri);
     }
 
     return
@@ -165,8 +169,8 @@ function parse(string $uri): array
  */
 function normalize(string $uri): string
 {
-    $parts = $this->parse($uri);
-
+    $parts = parse($uri);
+    // $parts = $this->parse($uri);
     if (!empty($parts['path'])) {
         $pathParts = explode('/', ltrim($parts['path'], '/'));
         $newPathParts = [];
@@ -215,7 +219,8 @@ function normalize(string $uri): string
         $parts['host'] = strtolower($parts['host']);
     }
 
-    return $this->build($parts);
+    return build($parts);
+    // return $this->build($parts);
 }
 
 
@@ -390,4 +395,4 @@ function _parse_fallback(string $uri): array
 
     return $result;
 }
-}
+// }

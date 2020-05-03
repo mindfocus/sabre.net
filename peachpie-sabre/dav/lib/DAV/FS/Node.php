@@ -4,7 +4,7 @@
 
 namespace Sabre\DAV\FS;
 
-use Sabre\DAV\Exception\Forbidden;
+use Sabre\DAV\ExceptionNs\Forbidden;
 use Sabre\DAV\INode;
 use Sabre\Uri;
 

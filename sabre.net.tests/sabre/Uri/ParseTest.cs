@@ -12,11 +12,11 @@ namespace sabre.net.tests.sabre.Uri
 {
     class ParseTest
     {
-        protected Sabre.Uri.UriFunc func;
+        // protected Sabre.Uri.UriFunc func;
         [SetUp]
         public void Setup()
         {
-            func = new Sabre.Uri.UriFunc();
+            // func = new Sabre.Uri.UriFunc();
         }
          /**
      * @dataProvider parseData
@@ -27,7 +27,14 @@ namespace sabre.net.tests.sabre.Uri
           [Test, TestCaseSource("parseData1")]
     public void testParse(string input, PhpArray output)
     {
-            Assert.AreEqual(output.ToUri(), func.parse(input).ToUri());
+        Sabre.Uri.Version v = new Sabre.Uri.Version();
+        using (var context = Pchp.Core.Context.CreateEmpty()) {
+            context.EnableErrorReporting();
+            context.Include("Sabre/uri/lib/","functions.php");
+            var result = context.Call("split", input);
+        }
+
+            // Assert.AreEqual(output.ToUri(), func.parse(input).ToUri());
     }
          /**
      * @dataProvider parseData
@@ -38,7 +45,7 @@ namespace sabre.net.tests.sabre.Uri
           [Test, TestCaseSource("parseData1")]
     public void testParseFallback(string input, PhpArray output)
     {
-        var result = this.func._parse_fallback(input);
+        // var result = this.func._parse_fallback(input);
             //result.Add("scheme", PhpValue.Null);
             //result.Add("host", PhpValue.Null);
             //result.Add("path", PhpValue.Null);
@@ -46,21 +53,21 @@ namespace sabre.net.tests.sabre.Uri
             //result.Add("user", PhpValue.Null);
             //result.Add("query", PhpValue.Null);
             //result.Add("fragment", PhpValue.Null);
-            var v1 = output.ToUri();
-            var v2 = result.ToUri();
-            Assert.AreEqual(output.ToUri() , result.ToUri());
+            // var v1 = output.ToUri();
+            // var v2 = result.ToUri();
+            // Assert.AreEqual(output.ToUri() , result.ToUri());
     }
         [Test]
         [ExpectedException(typeof(InvalidUriException))]
          public void testParseFallbackShouldThrowInvalidUriException()
     {
-        this.func._parse_fallback("ssh://invalid::7000/hello?foo=bar#test");
+        // this.func._parse_fallback("ssh://invalid::7000/hello?foo=bar#test");
     }
         [Test]
         [ExpectedExceptionMessage("Invalid, or could not parse URI")]
          public void testParseFallbackShouldThrowInvalidUriExceptionMsg()
             {
-            this.func._parse_fallback("ssh://invalid::7000/hello?foo=bar#test");
+            // this.func._parse_fallback("ssh://invalid::7000/hello?foo=bar#test");
             }
         public static IEnumerable<object[]> parseData1()
         {

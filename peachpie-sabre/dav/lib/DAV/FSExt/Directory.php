@@ -113,7 +113,7 @@ class Directory extends Node implements DAV\ICollection, DAV\IQuota, DAV\IMoveTa
     public function childExists($name)
     {
         if ('.' == $name || '..' == $name) {
-            throw new DAV\Exception\Forbidden('Permission denied to . and ..');
+            throw new DAV\ExceptionNs\Forbidden('Permission denied to . and ..');
         }
         $path = $this->path.'/'.$name;
 

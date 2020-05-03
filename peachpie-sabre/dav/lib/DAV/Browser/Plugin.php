@@ -122,7 +122,7 @@ class Plugin extends DAV\ServerPlugin
             case 'info':
                 try {
                     $this->server->tree->getNodeForPath($request->getPath());
-                } catch (DAV\Exception\NotFound $e) {
+                } catch (DAV\ExceptionNs\NotFound $e) {
                     // We're simply stopping when the file isn't found to not interfere
                     // with other plugins.
                     return;
@@ -550,13 +550,13 @@ HTML;
         // Making sure people aren't trying to escape from the base path.
         $path = str_replace('\\', '/', $path);
         if (false !== strpos($path, '/../') || '/..' === strrchr($path, '/')) {
-            throw new DAV\Exception\NotFound('Path does not exist, or escaping from the base path was detected');
+            throw new DAV\ExceptionNs\NotFound('Path does not exist, or escaping from the base path was detected');
         }
         $realPath = realpath($path);
         if ($realPath && 0 === strpos($realPath, realpath($assetDir)) && file_exists($path)) {
             return $path;
         }
-        throw new DAV\Exception\NotFound('Path does not exist, or escaping from the base path was detected');
+        throw new DAV\ExceptionNs\NotFound('Path does not exist, or escaping from the base path was detected');
     }
 
     /**

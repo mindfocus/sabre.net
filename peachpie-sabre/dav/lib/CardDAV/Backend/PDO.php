@@ -161,7 +161,7 @@ class PDO extends AbstractBackend implements SyncSupport
                     $values['description'] = $newValue;
                     break;
                 default:
-                    throw new DAV\Exception\BadRequest('Unknown property: '.$property);
+                    throw new DAV\ExceptionNs\BadRequest('Unknown property: '.$property);
             }
         }
 

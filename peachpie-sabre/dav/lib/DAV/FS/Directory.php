@@ -76,7 +76,7 @@ class Directory extends Node implements DAV\ICollection, DAV\IQuota
         $path = $this->path.'/'.$name;
 
         if (!file_exists($path)) {
-            throw new DAV\Exception\NotFound('File with name '.$path.' could not be located');
+            throw new DAV\ExceptionNs\NotFound('File with name '.$path.' could not be located');
         }
         if (is_dir($path)) {
             return new self($path);

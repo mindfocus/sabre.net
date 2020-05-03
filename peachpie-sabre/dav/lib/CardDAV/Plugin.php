@@ -5,7 +5,7 @@
 namespace Sabre\CardDAV;
 
 use Sabre\DAV;
-use Sabre\DAV\Exception\ReportNotSupported;
+use Sabre\DAV\ExceptionNs\ReportNotSupported;
 use Sabre\DAV\Xml\Property\LocalHref;
 use Sabre\DAVACL;
 use Sabre\HTTP;
@@ -328,11 +328,11 @@ class Plugin extends DAV\ServerPlugin
                 $vobj = VObject\Reader::read($data);
             }
         } catch (VObject\ParseException $e) {
-            throw new DAV\Exception\UnsupportedMediaType('This resource only supports valid vCard or jCard data. Parse error: '.$e->getMessage());
+            throw new DAV\ExceptionNs\UnsupportedMediaType('This resource only supports valid vCard or jCard data. Parse error: '.$e->getMessage());
         }
 
         if ('VCARD' !== $vobj->name) {
-            throw new DAV\Exception\UnsupportedMediaType('This collection can only support vcard objects.');
+            throw new DAV\ExceptionNs\UnsupportedMediaType('This collection can only support vcard objects.');
         }
 
         $options = VObject\Node::PROFILE_CARDDAV;
@@ -366,7 +366,7 @@ class Plugin extends DAV\ServerPlugin
                     break;
                 case 3:
                     // Level 3 means a critical error
-                    throw new DAV\Exception\UnsupportedMediaType('Validation error in vCard: '.$message['message']);
+                    throw new DAV\ExceptionNs\UnsupportedMediaType('Validation error in vCard: '.$message['message']);
             }
         }
         if ($warningMessage) {

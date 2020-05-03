@@ -4,8 +4,8 @@
 
 namespace Sabre\DAVACL\FS;
 
-use Sabre\DAV\Exception\Forbidden;
-use Sabre\DAV\Exception\NotFound;
+use Sabre\DAV\ExceptionNs\Forbidden;
+use Sabre\DAV\ExceptionNs\NotFound;
 use Sabre\DAV\FSExt\Directory as BaseCollection;
 use Sabre\DAVACL\ACLTrait;
 use Sabre\DAVACL\IACL;

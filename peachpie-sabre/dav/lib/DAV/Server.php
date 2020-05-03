@@ -517,7 +517,7 @@ class Server implements LoggerAwareInterface, EmitterInterface
         // The MKCOL is only allowed on an unmapped uri
         try {
             $this->tree->getNodeForPath($path);
-        } catch (Exception\NotFound $e) {
+        } catch (ExceptionNs\NotFound $e) {
             $methods[] = 'MKCOL';
         }
 

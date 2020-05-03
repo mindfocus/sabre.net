@@ -5,13 +5,13 @@
 namespace Sabre\DAVACL;
 
 use Sabre\DAV;
-use Sabre\DAV\Exception\BadRequest;
-use Sabre\DAV\Exception\Forbidden;
-use Sabre\DAV\Exception\NotAuthenticated;
-use Sabre\DAV\Exception\NotFound;
+use Sabre\DAV\ExceptionNs\BadRequest;
+use Sabre\DAV\ExceptionNs\Forbidden;
+use Sabre\DAV\ExceptionNs\NotAuthenticated;
+use Sabre\DAV\ExceptionNs\NotFound;
 use Sabre\DAV\INode;
 use Sabre\DAV\Xml\Property\Href;
-use Sabre\DAVACL\Exception\NeedPrivileges;
+use Sabre\DAVACL\ExceptionNs\NeedPrivileges;
 use Sabre\HTTP\RequestInterface;
 use Sabre\HTTP\ResponseInterface;
 use Sabre\Uri;
@@ -1115,7 +1115,7 @@ class Plugin extends DAV\ServerPlugin
         $body = $request->getBodyAsString();
 
         if (!$body) {
-            throw new DAV\Exception\BadRequest('XML body expected in ACL request');
+            throw new DAV\ExceptionNs\BadRequest('XML body expected in ACL request');
         }
 
         $acl = $this->server->xml->expect('{DAV:}acl', $body);
@@ -1128,7 +1128,7 @@ class Plugin extends DAV\ServerPlugin
         $node = $this->server->tree->getNodeForPath($path);
 
         if (!$node instanceof IACL) {
-            throw new DAV\Exception\MethodNotAllowed('This node does not support the ACL method');
+            throw new DAV\ExceptionNs\MethodNotAllowed('This node does not support the ACL method');
         }
 
         $oldAcl = $this->getACL($node);
@@ -1154,28 +1154,28 @@ class Plugin extends DAV\ServerPlugin
             }
 
             if (!$found) {
-                throw new Exception\AceConflict('This resource contained a protected {DAV:}ace, but this privilege did not occur in the ACL request');
+                throw new ExceptionNs\AceConflict('This resource contained a protected {DAV:}ace, but this privilege did not occur in the ACL request');
             }
         }
 
         foreach ($newAcl as $newAce) {
             // Do we recognize the privilege
             if (!isset($supportedPrivileges[$newAce['privilege']])) {
-                throw new Exception\NotSupportedPrivilege('The privilege you specified ('.$newAce['privilege'].') is not recognized by this server');
+                throw new ExceptionNs\NotSupportedPrivilege('The privilege you specified ('.$newAce['privilege'].') is not recognized by this server');
             }
 
             if ($supportedPrivileges[$newAce['privilege']]['abstract']) {
-                throw new Exception\NoAbstract('The privilege you specified ('.$newAce['privilege'].') is an abstract privilege');
+                throw new ExceptionNs\NoAbstract('The privilege you specified ('.$newAce['privilege'].') is an abstract privilege');
             }
 
             // Looking up the principal
             try {
                 $principal = $this->server->tree->getNodeForPath($newAce['principal']);
             } catch (NotFound $e) {
-                throw new Exception\NotRecognizedPrincipal('The specified principal ('.$newAce['principal'].') does not exist');
+                throw new ExceptionNs\NotRecognizedPrincipal('The specified principal ('.$newAce['principal'].') does not exist');
             }
             if (!($principal instanceof IPrincipal)) {
-                throw new Exception\NotRecognizedPrincipal('The specified uri ('.$newAce['principal'].') is not a principal');
+                throw new ExceptionNs\NotRecognizedPrincipal('The specified uri ('.$newAce['principal'].') is not a principal');
             }
         }
         $node->setACL($newAcl);
@@ -1376,7 +1376,7 @@ class Plugin extends DAV\ServerPlugin
     {
         $httpDepth = $this->server->getHTTPDepth(0);
         if (0 !== $httpDepth) {
-            throw new DAV\Exception\BadRequest('This report is only defined when Depth: 0');
+            throw new DAV\ExceptionNs\BadRequest('This report is only defined when Depth: 0');
         }
 
         $writer = $this->server->xml->getWriter();

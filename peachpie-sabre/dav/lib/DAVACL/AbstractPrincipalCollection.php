@@ -113,7 +113,7 @@ abstract class AbstractPrincipalCollection extends DAV\Collection implements IPr
     {
         $principalInfo = $this->principalBackend->getPrincipalByPath($this->principalPrefix.'/'.$name);
         if (!$principalInfo) {
-            throw new DAV\Exception\NotFound('Principal with name '.$name.' not found');
+            throw new DAV\ExceptionNs\NotFound('Principal with name '.$name.' not found');
         }
 
         return $this->getChildForPrincipal($principalInfo);

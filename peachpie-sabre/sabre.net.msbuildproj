@@ -1,9 +1,10 @@
 <Project Sdk="Peachpie.NET.Sdk/0.9.970">
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-    <Description>Simpliest PHP project for .NET Core, a console application.</Description>
+    <Description>sabre.io project for .net core</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Version>1.0.0</Version>
+    <Authors>mindfocus</Authors>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="**/*.php" />

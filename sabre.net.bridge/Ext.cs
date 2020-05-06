@@ -22,9 +22,18 @@ namespace sabre.net.bridge
             result.fragment = source.GetItemValue(PhpValue.Create("fragment")).AsString();
             return result;
         }
-        //public static Available Available(this VCalendar source)
-        //{
-        //    return result;
-        //}
+        public static Available Available(this VCalendar source)
+        {
+            Available AvaObj = null;
+            foreach(var o in source.children().Array.Values)
+            {
+                if(o.Object.GetType() == typeof(Available))
+                {
+                    AvaObj = (Available)o.Object;
+                    break;
+                }
+            }
+            return AvaObj;
+        }
     }
 }

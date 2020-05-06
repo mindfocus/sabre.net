@@ -1075,7 +1075,7 @@ class Server implements LoggerAwareInterface, EmitterInterface
 
         $parent = $this->tree->getNodeForPath($dir);
         if (!$parent instanceof ICollection) {
-            throw new Exception\Conflict('Files can only be created as children of collections');
+            throw new ExceptionNs\Conflict('Files can only be created as children of collections');
         }
 
         // It is possible for an event handler to modify the content of the

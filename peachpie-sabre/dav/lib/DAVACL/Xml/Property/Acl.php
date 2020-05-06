@@ -175,7 +175,7 @@ class Acl implements Element, HtmlOutput
             $ace = $element['value'];
 
             if (empty($ace['{DAV:}principal'])) {
-                throw new DAV\Exception\BadRequest('Each {DAV:}ace element must have one {DAV:}principal element');
+                throw new DAV\ExceptionNs\BadRequest('Each {DAV:}ace element must have one {DAV:}principal element');
             }
             $principal = $ace['{DAV:}principal'];
 
@@ -197,7 +197,7 @@ class Acl implements Element, HtmlOutput
             $protected = array_key_exists('{DAV:}protected', $ace);
 
             if (!isset($ace['{DAV:}grant'])) {
-                throw new DAV\Exception\NotImplemented('Every {DAV:}ace element must have a {DAV:}grant element. {DAV:}deny is not yet supported');
+                throw new DAV\ExceptionNs\NotImplemented('Every {DAV:}ace element must have a {DAV:}grant element. {DAV:}deny is not yet supported');
             }
             foreach ($ace['{DAV:}grant'] as $elem) {
                 if ('{DAV:}privilege' !== $elem['name']) {

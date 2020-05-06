@@ -2,7 +2,6 @@
 
 namespace Sabre\Uri;
 
-// class UriFunc{
 /**
  * This file contains all the uri handling functions.
  *
@@ -395,4 +394,3 @@ function _parse_fallback(string $uri): array
 
     return $result;
 }
-// }

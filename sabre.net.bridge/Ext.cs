@@ -1,4 +1,5 @@
 ﻿using Pchp.Core;
+using Sabre.VObject.ComponentNs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,5 +22,9 @@ namespace sabre.net.bridge
             result.fragment = source.GetItemValue(PhpValue.Create("fragment")).AsString();
             return result;
         }
+        //public static Available Available(this VCalendar source)
+        //{
+        //    return result;
+        //}
     }
 }

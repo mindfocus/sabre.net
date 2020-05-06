@@ -30,11 +30,11 @@ namespace sabre.net.tests.sabre.Uri
             //"/\xC3\xA0fo\xC3\xB3/bar" => ["/\xC3\xA0fo\xC3\xB3", 'bar'],
             //"/\xC3\xA0foo/b\xC3\xBCr/" => ["/\xC3\xA0foo", "b\xC3\xBCr"],
             //"foo/\xC3\xA0\xC3\xBCr" => ['foo', "\xC3\xA0\xC3\xBCr"],
-            //  var func = new Sabre.Uri.UriFunc();
-            foreach(var str in strings)
+            var func = new Sabre.Uri.UriFunctions();
+            foreach (var str in strings)
             {
-                // var output = func.split(str.Key.String);
-                // Assert.AreEqual(str.Value, output);
+                var output = func.split(str.Key.String);
+                Assert.AreEqual(str.Value, output);
             }
     }
     }

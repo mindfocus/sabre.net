@@ -6,7 +6,7 @@ namespace Sabre\DAVACL\Xml\Property;
 
 use Sabre\DAV;
 use Sabre\DAV\Browser\HtmlOutputHelper;
-use Sabre\DAV\Exception\BadRequest;
+use Sabre\DAV\ExceptionNs\BadRequest;
 use Sabre\Xml\Reader;
 use Sabre\Xml\Writer;
 

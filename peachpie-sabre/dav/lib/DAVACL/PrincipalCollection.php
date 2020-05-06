@@ -4,7 +4,7 @@
 
 namespace Sabre\DAVACL;
 
-use Sabre\DAV\Exception\InvalidResourceType;
+use Sabre\DAV\ExceptionNs\InvalidResourceType;
 use Sabre\DAV\IExtendedCollection;
 use Sabre\DAV\MkCol;
 

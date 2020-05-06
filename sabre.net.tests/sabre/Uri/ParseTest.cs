@@ -2,21 +2,17 @@
 using Pchp.Core;
 using sabre.net.bridge;
 using Sabre.Uri;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace sabre.net.tests.sabre.Uri
 {
     class ParseTest
     {
-        // protected Sabre.Uri.UriFunc func;
+        protected Sabre.Uri.UriFunctions func;
         [SetUp]
         public void Setup()
         {
-            // func = new Sabre.Uri.UriFunc();
+            func = new Sabre.Uri.UriFunctions();
         }
          /**
      * @dataProvider parseData
@@ -27,14 +23,8 @@ namespace sabre.net.tests.sabre.Uri
           [Test, TestCaseSource("parseData1")]
     public void testParse(string input, PhpArray output)
     {
-        Sabre.Uri.Version v = new Sabre.Uri.Version();
-        using (var context = Pchp.Core.Context.CreateEmpty()) {
-            context.EnableErrorReporting();
-            context.Include("Sabre/uri/lib/","functions.php");
-            var result = context.Call("split", input);
-        }
-
-            // Assert.AreEqual(output.ToUri(), func.parse(input).ToUri());
+            var actualOutput = func.parse(input).ToUri();
+            Assert.AreEqual(output.ToUri(), actualOutput);
     }
          /**
      * @dataProvider parseData
@@ -97,7 +87,7 @@ namespace sabre.net.tests.sabre.Uri
             actualResult1.Add("path", "/%E6%9C%89%E8%AF%8D%E6%B3%95%E5%88%AB%E5%90%8D.zh");
             actualResult1.Add("port", 0);
             actualResult1.Add("user", PhpValue.Null);
-            actualResult1.Add("query", "foo=bar");
+            actualResult1.Add("query", PhpValue.Null);
             actualResult1.Add("fragment", PhpValue.Null);
             result.Add(new object[]{ "http://example.org/有词法别名.zh",  actualResult1});
             return result;

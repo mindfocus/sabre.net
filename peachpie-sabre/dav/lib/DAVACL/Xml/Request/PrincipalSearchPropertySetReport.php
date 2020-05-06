@@ -4,7 +4,7 @@
 
 namespace Sabre\DAVACL\Xml\Request;
 
-use Sabre\DAV\Exception\BadRequest;
+use Sabre\DAV\ExceptionNs\BadRequest;
 use Sabre\Xml\Reader;
 use Sabre\Xml\XmlDeserializable;
 

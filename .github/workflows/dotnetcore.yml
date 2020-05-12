@@ -16,10 +16,16 @@ jobs:
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 3.1.101
+        dotnet-version: 5.0.100-preview.2.20176.6
     - name: Install dependencies
       run: dotnet restore
     - name: Build
       run: dotnet build --configuration Release --no-restore
     - name: Test
       run: dotnet test sabre.net.tests --no-restore --verbosity normal
+    - name: publish to nuget
+      id: publish_nuget
+      uses: rohith/publish-nuget@v2
+      with:
+       PROJECT_FILE_PATH: peachpie-sabre/sabre.net.sln
+       NUGET_KEY: ${{secrets.NUGET_KEY}}

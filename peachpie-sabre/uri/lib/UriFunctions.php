@@ -1,6 +1,5 @@
 ﻿<?php
 
-// place your code here
 namespace Sabre\Uri;
 
 class UriFunctions {

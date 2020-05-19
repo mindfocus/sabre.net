@@ -6,12 +6,15 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Version>1.0.1</Version>
     <Authors>mindfocus</Authors>
+    <PackageVersion>1.0.2</PackageVersion>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="**/*.php" />
+    <Compile Remove="sabre.net.end\**" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="uri\lib\UriFunctions.php" />
+    <None Remove="sabre.net.end\**" />
   </ItemGroup>
   <ItemGroup>
     <DotNetCliToolReference Include="Peachpie.Compiler.Tools" Version="0.9.0-*" />
@@ -23,6 +26,6 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\sabre.net.rep\sabre.net.rep.csproj" />
+    <EmbeddedResource Remove="sabre.net.end\**" />
   </ItemGroup>
 </Project>

@@ -2,9 +2,11 @@
 using Pchp.Core;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace sabre.net.tests.sabre.Xml
 {
@@ -25,8 +27,18 @@ namespace sabre.net.tests.sabre.Xml
 
         public void compare(PhpValue input, PhpValue output)
         {
+            MemoryStream ms = new MemoryStream();
+            var ss = System.Xml.XmlWriter.Create(ms);
+            // ss.Settings.Indent = true;
+            ss.WriteStartDocument();
+            ss.WriteStartElement("{http://sabredav.org/ns}root");
+            ss.WriteAttributeString("s", "root");
+            ss.WriteEndElement();
+            ss.Flush();
+            var result = Encoding.UTF8.GetString(ms.GetBuffer());
             this.writer.write(input);
-            var realOutput = this.writer.outputMemory();
+            var realOutput = this.writer.outputMemory(true);
+            this.writer.write("{http://sabredav.org/ns}root");
             Assert.AreEqual(output, realOutput);
         }
         [Test]

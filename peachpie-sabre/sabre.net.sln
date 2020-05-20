@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sabre.net.bridge", "..\sabr
 EndProject
 Project("{9344BDBB-3E7F-41FC-A0DD-8665D75EE146}") = "sabre.net", "sabre.net.msbuildproj", "{048A1D77-110B-4A13-A8C6-F885F1AEDACE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sabre.net.end", "sabre.net.end\sabre.net.end.csproj", "{81D7C6FA-E626-4C9A-B94D-0A1D999F38DC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sabre.net.end", "..\sabre.net.end\sabre.net.end.csproj", "{81D7C6FA-E626-4C9A-B94D-0A1D999F38DC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

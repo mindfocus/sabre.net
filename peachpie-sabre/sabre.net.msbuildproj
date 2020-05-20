@@ -4,9 +4,8 @@
     <Description>sabre.io project for .net core</Description>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <Authors>mindfocus</Authors>
-    <PackageVersion>1.0.2</PackageVersion>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="**/*.php" />

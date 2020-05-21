@@ -1,6 +1,6 @@
 <Project Sdk="Peachpie.NET.Sdk/0.9.981">
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>netcoreapp5.0</TargetFramework>
     <Description>sabre.io project for .net core</Description>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>

@@ -11,6 +11,8 @@ Project("{9344BDBB-3E7F-41FC-A0DD-8665D75EE146}") = "sabre.net", "sabre.net.msbu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sabre.net.end", "..\sabre.net.end\sabre.net.end.csproj", "{81D7C6FA-E626-4C9A-B94D-0A1D999F38DC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "libxml2.net", "..\libxml2.net\libxml2.net.csproj", "{30C175FA-724B-4292-87D2-DA8FEF6795ED}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{81D7C6FA-E626-4C9A-B94D-0A1D999F38DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{81D7C6FA-E626-4C9A-B94D-0A1D999F38DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{81D7C6FA-E626-4C9A-B94D-0A1D999F38DC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{30C175FA-724B-4292-87D2-DA8FEF6795ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{30C175FA-724B-4292-87D2-DA8FEF6795ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{30C175FA-724B-4292-87D2-DA8FEF6795ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{30C175FA-724B-4292-87D2-DA8FEF6795ED}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

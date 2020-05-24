@@ -27,4 +27,7 @@
   <ItemGroup>
     <EmbeddedResource Remove="sabre.net.end\**" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\libxml2.net\libxml2.net.csproj" />
+  </ItemGroup>
 </Project>

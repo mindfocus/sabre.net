@@ -38,7 +38,6 @@ namespace sabre.net.tests.sabre.Xml
             var result = Encoding.UTF8.GetString(ms.GetBuffer());
             this.writer.write(input);
             var realOutput = this.writer.outputMemory(true);
-            this.writer.write("{http://sabredav.org/ns}root");
             Assert.AreEqual(output, realOutput);
         }
         [Test]
@@ -48,6 +47,7 @@ namespace sabre.net.tests.sabre.Xml
             map.Add("{http://sabredav.org/ns}root", "text");
             var rawText = "<?xml version=\"1.0\"?>" + Environment.NewLine + "<s:root xmlns:s=\"http://sabredav.org/ns\">text</s:root>";
             this.compare(map, rawText);
+            
         }
         /**
  * @depends testSimple

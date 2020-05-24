@@ -12,7 +12,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-16.04, ubuntu-18.04, macos-latest]
+        os: [ubuntu-latest, macos-latest]
     steps:
     - uses: actions/checkout@v2
     - name: Setup .NET Core
@@ -23,8 +23,8 @@ jobs:
       run: dotnet restore peachpie-sabre/sabre.net.sln
     - name: Build
       run: dotnet build peachpie-sabre/sabre.net.sln --configuration Release --no-restore
-    - name: Test
-      run: dotnet test sabre.net.tests --no-restore --verbosity normal
+    #- name: Test
+    #  run: dotnet test sabre.net.tests --no-restore --verbosity normal
     - name: publish to nuget
       id: publish_nuget
       uses: rohith/publish-nuget@v2

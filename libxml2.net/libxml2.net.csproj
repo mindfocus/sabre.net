@@ -5,26 +5,12 @@
         <LangVersion>8</LangVersion>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <RootNamespace>ConsoleApp1</RootNamespace>
+        <OutputType>Exe</OutputType>
     </PropertyGroup>
 
     <ItemGroup>
       <Compile Remove="globals.cs" />
-      <Compile Remove="Program.cs" />
       <Compile Remove="SafeNativeMethods.cs" />
-      <Compile Remove="XmlAutomata.cs" />
-      <Compile Remove="XmlAutomataState.cs" />
-      <Compile Remove="XmlBuffer.cs" />
-      <Compile Remove="XmlCharEncodingHandler.cs" />
-      <Compile Remove="XmlGlobalState.cs" />
-      <Compile Remove="xmlIO.cs" />
-      <Compile Remove="XmlMallocFunc.cs" />
-      <Compile Remove="XmlOutputBuffer.cs" />
-      <Compile Remove="XmlTextWriter.cs" />
-      <Compile Remove="XmlValidCtxt.cs" />
-      <Compile Remove="XmlValidState.cs" />
-      <Compile Remove="xmlversion.cs" />
-      <Compile Remove="xmlwriter.cs" />
-      <Compile Remove="libxml.cs" />
     </ItemGroup>
     <ItemGroup>
       <None Include="native\mac\libxml2.2.dylib" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />

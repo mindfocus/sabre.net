@@ -1,11 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netcoreapp5.0</TargetFramework>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
         <LangVersion>8</LangVersion>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <RootNamespace>ConsoleApp1</RootNamespace>
-        <OutputType>Exe</OutputType>
     </PropertyGroup>
 
     <ItemGroup>

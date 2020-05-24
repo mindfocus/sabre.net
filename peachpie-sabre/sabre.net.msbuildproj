@@ -1,11 +1,11 @@
 <Project Sdk="Peachpie.NET.Sdk/0.9.981">
   <PropertyGroup>
-    <TargetFramework>netcoreapp5.0</TargetFramework>
     <Description>sabre.io project for .net core</Description>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.3</Version>
+    <Version>1.0.4</Version>
     <Authors>mindfocus</Authors>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="**/*.php" />
@@ -26,8 +26,5 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Remove="sabre.net.end\**" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\libxml2.net\libxml2.net.csproj" />
   </ItemGroup>
 </Project>

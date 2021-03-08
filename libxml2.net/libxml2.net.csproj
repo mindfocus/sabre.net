@@ -15,6 +15,6 @@
       <None Include="native\mac\libxml2.2.dylib" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     </ItemGroup>
     <ItemGroup>
-      <PackageReference Include="Peachpie.Runtime" Version="0.9.981" />
+      <PackageReference Include="Peachpie.Runtime" Version="1.0.0" />
     </ItemGroup>
 </Project>

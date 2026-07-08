@@ -61,3 +61,10 @@
 #*.PDF   diff=astextplain
 #*.rtf   diff=astextplain
 #*.RTF   diff=astextplain
+
+# 强制 C# 与项目文件使用 LF，确保 CI 与本地工作区的换行一致。
+# 测试代码中的 verbatim 字符串期望值基于 LF，CRLF 会导致断言失败。
+*.cs     text eol=lf
+*.csproj text eol=lf
+*.msbuildproj text eol=lf
+*.yml    text eol=lf

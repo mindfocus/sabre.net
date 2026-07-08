@@ -84,8 +84,7 @@ jobs:
         user: ${{ secrets.NUGET_USER }}
 
     - name: Publish to NuGet
-      # 用 login 步骤输出的短期 token；bash shell 正确展开 nupkg 通配符
+      # 用 login 步骤输出的短期 token（NuGet/login 的 output 名为 NUGET_API_KEY）；
+      # bash shell 正确展开 nupkg 通配符
       shell: bash
-      env:
-        NUGET_AUTH_TOKEN: ${{ steps.nuget-login.outputs.NUGET_AUTH_TOKEN }}
-      run: dotnet nuget push ./nupkg/*.nupkg --api-key ${{ steps.nuget-login.outputs.NUGET_AUTH_TOKEN }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+      run: dotnet nuget push ./nupkg/*.nupkg --api-key ${{ steps.nuget-login.outputs.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate

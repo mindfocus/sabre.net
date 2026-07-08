@@ -1,7 +1,6 @@
 <?php
 
 
-
 namespace Sabre\DAVACL;
 
 /**
@@ -72,7 +71,7 @@ trait ACLTrait
      */
     public function setACL(array $acl)
     {
-        throw new \Sabre\DAV\ExceptionNs\Forbidden('Setting ACL is not supported on this node');
+        throw new \Sabre\DAV\Exception\Forbidden('Setting ACL is not supported on this node');
     }
 
     /**

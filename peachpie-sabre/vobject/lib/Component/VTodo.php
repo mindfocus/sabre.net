@@ -1,6 +1,6 @@
 <?php
 
-namespace Sabre\VObject\ComponentNs;
+namespace Sabre\VObject\Component;
 
 use DateTimeInterface;
 use Sabre\VObject;
@@ -22,9 +22,6 @@ class VTodo extends VObject\Component
      *
      * The rules used to determine if an event falls within the specified
      * time-range is based on the CalDAV specification.
-     *
-     * @param DateTimeInterface $start
-     * @param DateTimeInterface $end
      *
      * @return bool
      */

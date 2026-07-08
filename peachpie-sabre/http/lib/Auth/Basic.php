@@ -1,7 +1,6 @@
 <?php
 
 
-
 namespace Sabre\HTTP\Auth;
 
 /**
@@ -49,7 +48,7 @@ class Basic extends AbstractAuth
     }
 
     /**
-     * This method sends the needed HTTP header and statuscode (401) to force
+     * This method sends the needed HTTP header and status code (401) to force
      * the user to login.
      */
     public function requireLogin()

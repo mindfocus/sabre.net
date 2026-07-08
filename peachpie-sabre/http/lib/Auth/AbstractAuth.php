@@ -1,7 +1,6 @@
 <?php
 
 
-
 namespace Sabre\HTTP\Auth;
 
 use Sabre\HTTP\RequestInterface;
@@ -42,7 +41,7 @@ abstract class AbstractAuth
     /**
      * Creates the object.
      */
-    public function __construct(string $realm = 'SabreTooth', RequestInterface $request, ResponseInterface $response)
+    public function __construct(string $realm, RequestInterface $request, ResponseInterface $response)
     {
         $this->realm = $realm;
         $this->request = $request;
@@ -50,7 +49,7 @@ abstract class AbstractAuth
     }
 
     /**
-     * This method sends the needed HTTP header and statuscode (401) to force
+     * This method sends the needed HTTP header and status code (401) to force
      * the user to login.
      */
     abstract public function requireLogin();

@@ -1,12 +1,13 @@
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Security;
 using Pchp.Core;
 
-namespace Peachpie.Library.XmlDom
+namespace Nextsharp.LibXml2
 {
-    [PhpType(PhpTypeAttribute.InheritName), PhpExtension("xmlwriter")]
+    [PhpType(PhpTypeAttribute.InheritName), PhpExtension("nextsharp_libxml2")]
     public class XMLWriter
     {
         #region Constants
@@ -17,107 +18,99 @@ namespace Peachpie.Library.XmlDom
 
         #region Fields and properties
 
+        private static readonly IntPtr NativeLibraryHandle = libxml2.LoadNativaLibrary();
         private IntPtr _ptr = IntPtr.Zero;
         private IntPtr _buffer = IntPtr.Zero;
+        private bool _documentCompleted;
 
         #endregion
 
         public bool endAttribute()
         {
-            return -1 == libxml2.XmlTextWriterEndAttribute(_ptr);
+            return libxml2.XmlTextWriterEndAttribute(_ptr) != -1;
 
         }
+        public bool endCData() => endCdata();
         public bool endCdata()
         {
-            return -1 == libxml2.XmlTextWriterEndCDATA(_ptr);
+            return libxml2.XmlTextWriterEndCDATA(_ptr) != -1;
 
         }
 
         public bool endComment()
         {
-            return -1 == libxml2.XmlTextWriterEndComment(_ptr);
+            return libxml2.XmlTextWriterEndComment(_ptr) != -1;
 
         }
 
         public bool endDocument()
         {
-            return -1 == libxml2.XmlTextWriterEndDocument(_ptr);
+            var result = libxml2.XmlTextWriterEndDocument(_ptr) != -1;
+            if (result)
+            {
+                _documentCompleted = true;
+            }
+
+            return result;
 
         }
 
         public bool endDtdAttlist()
         {
-            return -1 == libxml2.XmlTextWriterEndDTDAttlist(_ptr);
+            return libxml2.XmlTextWriterEndDTDAttlist(_ptr) != -1;
 
         }
 
         public bool endDtdElement()
         {
-            return -1 == libxml2.XmlTextWriterEndDTDElement(_ptr);
+            return libxml2.XmlTextWriterEndDTDElement(_ptr) != -1;
 
         }
 
         public bool endDtdEntity()
         {
-            return -1 == libxml2.XmlTextWriterEndDTDEntity(_ptr);
+            return libxml2.XmlTextWriterEndDTDEntity(_ptr) != -1;
         }
 
         public bool endDtd()
         {
-            return -1 == libxml2.XmlTextWriterEndDTD(_ptr);
+            return libxml2.XmlTextWriterEndDTD(_ptr) != -1;
         }
 
         public bool endElement()
         {
-            return -1 == libxml2.XmlTextWriterEndElement(_ptr);
+            return libxml2.XmlTextWriterEndElement(_ptr) != -1;
 
         }
         public bool endPi()
         {
-            return -1 == libxml2.XmlTextWriterEndPI(_ptr);
+            return libxml2.XmlTextWriterEndPI(_ptr) != -1;
         }
         public bool setIndentString(string indentString) => CheckedCall(() =>
-        {
-            unsafe
-            {
-                var indentStringPtr = Marshal.StringToHGlobalAuto(indentString);
-
-                libxml2.XmlTextWriterSetIndentString(_ptr, (byte*) indentStringPtr);
-            }
-        });
+            libxml2.XmlTextWriterSetIndentString(_ptr, indentString)
+        );
 
         public bool setIndent(bool indent) => CheckedCall(() =>
         {
 
-            libxml2.XmlTextWriterSetIndent(_ptr, 0);
+            libxml2.XmlTextWriterSetIndent(_ptr, indent ? 1 : 0);
         });
+        public bool startAttributeNS(string prefix, string name, string uri) => startAttributeNs(prefix, name, uri);
         public bool startAttributeNs(string prefix, string name, string uri) => CheckedCall(() =>
-        {
-            unsafe
-            {
-                var prefixPtr = Marshal.StringToHGlobalAuto(prefix);
-                var namePtr = Marshal.StringToHGlobalAuto(name);
-                var uriPtr = Marshal.StringToHGlobalAuto(uri);
-                libxml2.XmlTextWriterStartAttributeNS(_ptr, (byte*) prefixPtr, (byte*) namePtr, (byte*) uriPtr);
-            }
-        });
+            libxml2.XmlTextWriterStartAttributeNS(_ptr, prefix, name, uri)
+        );
         
         public bool startAttribute(string name) => CheckedCall(() =>
-        {
-            unsafe
-            {
-                var namePtr = Marshal.StringToHGlobalAuto(name);
-                libxml2.XmlTextWriterStartAttribute(_ptr, (byte*) namePtr);
-            }
-
-        });
+            libxml2.XmlTextWriterStartAttribute(_ptr, name)
+        );
         public bool startCdata()
         {
-            return -1 == libxml2.XmlTextWriterStartCDATA(_ptr);
+            return libxml2.XmlTextWriterStartCDATA(_ptr) != -1;
         }
+        public bool startCData() => startCdata();
         public bool startComment()
         {
-            return -1 == libxml2.XmlTextWriterStartComment(_ptr);
+            return libxml2.XmlTextWriterStartComment(_ptr) != -1;
         }
 
         public bool startDocument(string version = DefaultXmlVersion, string encoding = null, string standalone = null)
@@ -148,213 +141,114 @@ namespace Peachpie.Library.XmlDom
         }
         
         public bool startDtdAttlist(string name) => CheckedCall(() =>
-            {
-                unsafe
-                {
-                    var namePtr = Marshal.StringToHGlobalAuto(name);
-                    libxml2.XmlTextWriterStartDTDAttlist(_ptr, (byte*) namePtr);
-                }
-            }
+            libxml2.XmlTextWriterStartDTDAttlist(_ptr, name)
         );
         public bool startDtdEntity(int pe, string name) => CheckedCall(() =>
-            {
-                unsafe
-                {
-                    var namePtr = Marshal.StringToHGlobalAuto(name);
-                    libxml2.XmlTextWriterStartDTDEntity(_ptr, pe, (byte*) namePtr);
-                }
-            }
+            libxml2.XmlTextWriterStartDTDEntity(_ptr, pe, name)
         );
         
         public bool startDtd(string name, string pubid, string sysid) => CheckedCall(() =>
-            {
-                unsafe
-                {
-                    var namePtr = Marshal.StringToHGlobalAuto(name);
-                    var pubidPtr = Marshal.StringToHGlobalAuto(pubid);
-                    var sysidPtr = Marshal.StringToHGlobalAuto(sysid);
-                    libxml2.XmlTextWriterStartDTD(_ptr, (byte*) namePtr, (byte*) pubidPtr, (byte*) sysidPtr);
-                }
-            }
+            libxml2.XmlTextWriterStartDTD(_ptr, name, pubid, sysid)
         );
 
+        public bool startElementNS(string prefix, string name, string uri) => startElementNs(prefix, name, uri);
         public bool startElementNs(string prefix, string name, string uri) => CheckedCall(() =>
-            {
-                unsafe
-                {
-                    var prefixPtr = Marshal.StringToHGlobalAuto(prefix);
-                    var namePtr = Marshal.StringToHGlobalAuto(name);
-                    var uriPtr = Marshal.StringToHGlobalAuto(uri);
-                    libxml2.XmlTextWriterStartElementNS(_ptr, (byte*) prefixPtr, (byte*) namePtr, (byte*) uriPtr);
-                }
-            }
+            libxml2.XmlTextWriterStartElementNS(_ptr, prefix, name, uri)
         );
 
         public bool startElement(string name) => CheckedCall(() =>
-            {
-                unsafe
-                {
-                    var namePtr = Marshal.StringToHGlobalAuto(name);
-
-                    libxml2.XmlTextWriterStartElement(_ptr, (byte*) namePtr);
-                }
-            }
+            libxml2.XmlTextWriterStartElement(_ptr, name)
         );
 
         public bool startPi(string target) => CheckedCall(() =>
-        {
-            unsafe
-            {
-                var targetPtr = Marshal.StringToHGlobalAuto(target);
-                libxml2.XmlTextWriterStartPI(_ptr, (byte*) targetPtr);
-            }
-        });
+            libxml2.XmlTextWriterStartPI(_ptr, target)
+        );
 
+        public bool writeAttributeNS(string prefix, string name, string uri, string content) => writeAttributeNs(prefix, name, uri, content);
         public bool writeAttributeNs(string prefix, string name, string uri, string content) => CheckedCall(() =>
-        {
-            unsafe
-            {
-                var prefixPtr = Marshal.StringToHGlobalAuto(prefix);
-                var namePtr = Marshal.StringToHGlobalAuto(name);
-                var uriPtr = Marshal.StringToHGlobalAuto(uri);
-                var contentPtr = Marshal.StringToHGlobalAuto(content);
-                libxml2.XmlTextWriterWriteAttributeNS(_ptr, (byte*) prefixPtr, (byte*) namePtr, (byte*) uriPtr,
-                    (byte*) contentPtr);
-            }
-        });
+            libxml2.XmlTextWriterWriteAttributeNS(_ptr, prefix, name, uri, content)
+        );
 
         public bool writeAttribute(string name, string content) => CheckedCall(() =>
-        {
-            unsafe
-            {
-                var namePtr = Marshal.StringToHGlobalAuto(name);
-                var contentPtr = Marshal.StringToHGlobalAuto(content);
-                libxml2.XmlTextWriterWriteAttribute(_ptr, (byte*) namePtr, (byte*) contentPtr);
-            }
-        });
+            libxml2.XmlTextWriterWriteAttribute(_ptr, name, content)
+        );
 
+        public bool writeCData(string content) => writeCdata(content);
         public bool writeCdata(string content) => CheckedCall(() =>
-        {
-            unsafe
-            {
-                var contentPtr = Marshal.StringToHGlobalAuto(content);
-                libxml2.XmlTextWriterWriteCDATA(_ptr, (byte*) contentPtr);
-            }
-        });
+            libxml2.XmlTextWriterWriteCDATA(_ptr, content)
+        );
 
         public bool writeComment(string content) => CheckedCall(() =>
-        {
-            unsafe
-            {
-                var contentPtr = Marshal.StringToHGlobalAuto(content);
-                libxml2.XmlTextWriterWriteComment(_ptr, (byte*) contentPtr);
-            }
-        });
+            libxml2.XmlTextWriterWriteComment(_ptr, content)
+        );
+
+        public bool text(string content) => writeString(content);
+
+        public bool writeString(string content) => CheckedCall(() =>
+            libxml2.XmlTextWriterWriteString(_ptr, content)
+        );
 
         public bool writeDtdAttlist(string name, string content) => CheckedCall(() =>
-        {
-            unsafe
-            {
-                var namePtr = Marshal.StringToHGlobalAuto(name);
-                var contentPtr = Marshal.StringToHGlobalAuto(content);
-                libxml2.XmlTextWriterWriteDTDAttlist(_ptr, (byte*) namePtr, (byte*) contentPtr);
-            }
-        });
+            libxml2.XmlTextWriterWriteDTDAttlist(_ptr, name, content)
+        );
 
         public bool writeDtdElement(int pe, string name, string content) => CheckedCall(() =>
-        {
-            unsafe
-            {
-                var namePtr = Marshal.StringToHGlobalAuto(name);
-                var contentPtr = Marshal.StringToHGlobalAuto(content);
-                libxml2.XmlTextWriterWriteDTDElement(_ptr, (byte*) namePtr, (byte*) contentPtr);
-            }
-        });
+            libxml2.XmlTextWriterWriteDTDElement(_ptr, name, content)
+        );
 
         public bool writeDtdEntity(int pe, string name, string pubid, string sysid, string ndataid, string content) =>
             CheckedCall(() =>
-            {
-                unsafe
-                {
-                    var ndataidPtr = Marshal.StringToHGlobalAuto(ndataid);
-                    var namePtr = Marshal.StringToHGlobalAuto(name);
-                    var sysidPtr = Marshal.StringToHGlobalAuto(sysid);
-                    var pubidPtr = Marshal.StringToHGlobalAuto(pubid);
-                    var contentPtr = Marshal.StringToHGlobalAuto(content);
-                    libxml2.XmlTextWriterWriteDTDEntity(_ptr, pe, (byte*) namePtr, (byte*) pubidPtr, (byte*) sysidPtr,
-                        (byte*) ndataidPtr, (byte*) contentPtr);
-                }
-            });
+                libxml2.XmlTextWriterWriteDTDEntity(_ptr, pe, name, pubid, sysid, ndataid, content)
+            );
 
         public bool writeDtd(string name, string pubid, string sysid, string subset) => CheckedCall(() =>
-        {
-            unsafe
-            {
-                var subsetPtr = Marshal.StringToHGlobalAuto(subset);
-                var sysidPtr = Marshal.StringToHGlobalAuto(sysid);
-                var namePtr = Marshal.StringToHGlobalAuto(name);
-                var pubidPtr = Marshal.StringToHGlobalAuto(pubid);
-                libxml2.XmlTextWriterWriteDTD(_ptr, (byte*) namePtr, (byte*) pubidPtr, (byte*) sysidPtr,
-                    (byte*) subsetPtr);
-            }
-        });
+            libxml2.XmlTextWriterWriteDTD(_ptr, name, pubid, sysid, subset)
+        );
 
+        public bool writeElementNS(string prefix, string name, string uri, string content = null) => writeElementNs(prefix, name, uri, content);
         public bool writeElementNs(string prefix, string name, string uri, string content = null) =>
             CheckedCall(() =>
-            {
-                unsafe
-                {
-                    var prefixPtr = Marshal.StringToHGlobalAuto(prefix);
-                    var contentPtr = Marshal.StringToHGlobalAuto(content);
-                    var namePtr = Marshal.StringToHGlobalAuto(name);
-                    var uriPtr = Marshal.StringToHGlobalAuto(uri);
-                    libxml2.XmlTextWriterWriteElementNS(_ptr, (byte*) prefixPtr, (byte*) namePtr, (byte*) uriPtr,
-                        (byte*) contentPtr);
-                }
-            });
+                libxml2.XmlTextWriterWriteElementNS(_ptr, prefix, name, uri, content)
+            );
 
         public bool writeElement(string name, string content = null) => CheckedCall(() =>
-            {
-                unsafe
-                {
-                    var contentPtr = Marshal.StringToHGlobalAuto(content);
-                    var namePtr = Marshal.StringToHGlobalAuto(name);
-                    libxml2.XmlTextWriterWriteElement(_ptr, (byte*) namePtr, (byte*) contentPtr);
-                }
-            }
+                libxml2.XmlTextWriterWriteElement(_ptr, name, content)
         );
 
         public bool writePi(string target, string content)
         {
-            unsafe
-            {
-                var contentPtr = Marshal.StringToHGlobalAuto(content);
-                var targetPtr = Marshal.StringToHGlobalAuto(target);
-                return libxml2.XmlTextWriterWritePI(_ptr, (byte*) targetPtr, (byte*) contentPtr) != -1;
-            }
+            return libxml2.XmlTextWriterWritePI(_ptr, target, content) != -1;
         }
 
         public bool writeRaw(string content)
         {
-            unsafe
-            {
-                var contentPtr = Marshal.StringToHGlobalAuto(content);
-                return libxml2.XmlTextWriterWriteRaw(_ptr, (byte*) contentPtr) != -1;
-            }
+            return libxml2.XmlTextWriterWriteRaw(_ptr, content) != -1;
         }
 
         public XMLWriter()
         {
-            Console.WriteLine("ctor");
+            if (NativeLibraryHandle == IntPtr.Zero)
+            {
+                throw new DllNotFoundException("Unable to load libxml2 from the libxml2.net native directory.");
+            }
         }
 
 
+        public string outputMemory(bool flush = true)
+        {
+            if (flush && _ptr != IntPtr.Zero && !_documentCompleted)
+            {
+                endDocument();
+            }
+
+            return output_memory();
+        }
         public string output_memory()
         {
             unsafe
             {
                 var result = libxml2.XmlBufferContent(_buffer);
-                return Marshal.PtrToStringAuto((IntPtr) result);
+                return Marshal.PtrToStringUTF8((IntPtr) result) ?? string.Empty;
             }
         }
 
@@ -373,8 +267,10 @@ namespace Peachpie.Library.XmlDom
                 return false;
             }
 
+            _documentCompleted = false;
             return true;
         }
+        public bool openMemory() => open_memory();
 
         public void set_indent()
         {
@@ -393,12 +289,12 @@ namespace Peachpie.Library.XmlDom
                 operation();
                 return true;
             }
-            catch (ArgumentException e)
+            catch (ArgumentException)
             {
                 // PhpException.Throw(PhpError.Warning, e.Message);
                 return false;
             }
-            catch (InvalidOperationException e)
+            catch (InvalidOperationException)
             {
                 // PhpException.Throw(PhpError.Warning, e.Message);
                 return false;
@@ -407,31 +303,48 @@ namespace Peachpie.Library.XmlDom
 
         internal unsafe class libxml2
         {
-            internal const string LibraryName = "libxml2.2";
+            internal const string LibraryName = "libxml2";
             private const string macoslib = "native/mac/libxml2.2.dylib";
-            private const string windowslib = "native/win/libxml2.2.dll";
             private const string linuxlib = "native/linux/libxml2.2.so";
+            private const string windowsdir = "native/win";
+            private const string windowscharsetlib = "charset-1.dll";
+            private const string windowsiconvlib = "iconv-2.dll";
+            private const string windowszlib = "z.dll";
+            private const string windowslib = "libxml2.dll";
 
             internal static IntPtr LoadNativaLibrary()
             {
                 var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+                var assemblyDirectory = Path.GetDirectoryName(assembly.Location) ?? string.Empty;
                 IntPtr lib = IntPtr.Zero;
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
-                    NativeLibrary.TryLoad(macoslib, assembly, DllImportSearchPath.AssemblyDirectory, out lib);
+                    NativeLibrary.TryLoad(Path.Combine(assemblyDirectory, macoslib), out lib);
                 }
 
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
-                    NativeLibrary.TryLoad(linuxlib, assembly, DllImportSearchPath.AssemblyDirectory, out lib);
+                    NativeLibrary.TryLoad(Path.Combine(assemblyDirectory, linuxlib), out lib);
                 }
 
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
-                    NativeLibrary.TryLoad(windowslib, assembly, DllImportSearchPath.AssemblyDirectory, out lib);
+                    var windowsDirectory = Path.Combine(assemblyDirectory, windowsdir);
+                    TryLoadDependency(Path.Combine(windowsDirectory, windowscharsetlib));
+                    TryLoadDependency(Path.Combine(windowsDirectory, windowsiconvlib));
+                    TryLoadDependency(Path.Combine(windowsDirectory, windowszlib));
+                    NativeLibrary.TryLoad(Path.Combine(windowsDirectory, windowslib), out lib);
                 }
 
                 return lib;
+            }
+
+            private static void TryLoadDependency(string path)
+            {
+                if (File.Exists(path))
+                {
+                    NativeLibrary.TryLoad(path, out _);
+                }
             }
 
             [SuppressUnmanagedCodeSecurity]
@@ -470,107 +383,144 @@ namespace Peachpie.Library.XmlDom
             [SuppressUnmanagedCodeSecurity]
             [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl,
                 EntryPoint = "xmlTextWriterWriteRaw")]
-            internal static extern int XmlTextWriterWriteRaw(IntPtr writer, byte* content);
+            internal static extern int XmlTextWriterWriteRaw(IntPtr writer,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string content);
 
             [SuppressUnmanagedCodeSecurity]
             [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl,
                 EntryPoint = "xmlTextWriterWritePI")]
-            internal static extern int XmlTextWriterWritePI(IntPtr writer, byte* target, byte* content);
+            internal static extern int XmlTextWriterWritePI(IntPtr writer,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string target,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string content);
 
             [SuppressUnmanagedCodeSecurity]
             [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl,
                 EntryPoint = "xmlTextWriterWriteElement")]
-            internal static extern int XmlTextWriterWriteElement(IntPtr writer, byte* name, byte* content);
+            internal static extern int XmlTextWriterWriteElement(IntPtr writer,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string name,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string content);
 
             [SuppressUnmanagedCodeSecurity]
             [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl,
                 EntryPoint = "xmlTextWriterWriteElementNS")]
-            internal static extern int XmlTextWriterWriteElementNS(IntPtr writer, byte* prefix, byte* name,
-                byte* namespaceURI, byte* content);
+            internal static extern int XmlTextWriterWriteElementNS(IntPtr writer,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string prefix,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string name,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string namespaceURI,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string content);
 
             [SuppressUnmanagedCodeSecurity]
             [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl,
                 EntryPoint = "xmlTextWriterWriteDTD")]
-            internal static extern int XmlTextWriterWriteDTD(IntPtr writer, byte* name, byte* pubid, byte* sysid,
-                byte* subset);
+            internal static extern int XmlTextWriterWriteDTD(IntPtr writer,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string name,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string pubid,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string sysid,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string subset);
 
             [SuppressUnmanagedCodeSecurity]
             [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl,
                 EntryPoint = "xmlTextWriterWriteDTDEntity")]
-            internal static extern int XmlTextWriterWriteDTDEntity(IntPtr writer, int pe, byte* name, byte* pubid,
-                byte* sysid, byte* ndataid, byte* content);
+            internal static extern int XmlTextWriterWriteDTDEntity(IntPtr writer, int pe,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string name,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string pubid,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string sysid,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string ndataid,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string content);
 
             [SuppressUnmanagedCodeSecurity]
             [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl,
                 EntryPoint = "xmlTextWriterWriteDTDElement")]
-            internal static extern int XmlTextWriterWriteDTDElement(IntPtr writer, byte* name, byte* content);
+            internal static extern int XmlTextWriterWriteDTDElement(IntPtr writer,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string name,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string content);
 
             [SuppressUnmanagedCodeSecurity]
             [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl,
                 EntryPoint = "xmlTextWriterWriteDTDAttlist")]
-            internal static extern int XmlTextWriterWriteDTDAttlist(IntPtr writer, byte* name, byte* content);
+            internal static extern int XmlTextWriterWriteDTDAttlist(IntPtr writer,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string name,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string content);
 
             [SuppressUnmanagedCodeSecurity]
             [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl,
                 EntryPoint = "xmlTextWriterWriteComment")]
-            internal static extern int XmlTextWriterWriteComment(IntPtr writer, byte* content);
+            internal static extern int XmlTextWriterWriteComment(IntPtr writer,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string content);
 
             [SuppressUnmanagedCodeSecurity]
             [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl,
                 EntryPoint = "xmlTextWriterWriteCDATA")]
-            internal static extern int XmlTextWriterWriteCDATA(IntPtr writer, byte* content);
+            internal static extern int XmlTextWriterWriteCDATA(IntPtr writer,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string content);
 
             [SuppressUnmanagedCodeSecurity]
             [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl,
                 EntryPoint = "xmlTextWriterWriteAttribute")]
-            internal static extern int XmlTextWriterWriteAttribute(IntPtr writer, byte* name, byte* content);
+            internal static extern int XmlTextWriterWriteAttribute(IntPtr writer,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string name,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string content);
 
             [SuppressUnmanagedCodeSecurity]
             [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl,
                 EntryPoint = "xmlTextWriterWriteAttributeNS")]
-            internal static extern int XmlTextWriterWriteAttributeNS(IntPtr writer, byte* prefix, byte* name,
-                byte* namespaceURI, byte* content);
+            internal static extern int XmlTextWriterWriteAttributeNS(IntPtr writer,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string prefix,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string name,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string namespaceURI,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string content);
 
             [SuppressUnmanagedCodeSecurity]
             [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl,
                 EntryPoint = "xmlTextWriterWriteString")]
-            internal static extern int XmlTextWriterWriteString(IntPtr writer, byte* content);
+            internal static extern int XmlTextWriterWriteString(IntPtr writer,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string content);
 
             [SuppressUnmanagedCodeSecurity]
             [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl,
                 EntryPoint = "xmlTextWriterStartPI")]
-            internal static extern int XmlTextWriterStartPI(IntPtr writer, byte* target);
+            internal static extern int XmlTextWriterStartPI(IntPtr writer,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string target);
 
             [SuppressUnmanagedCodeSecurity]
             [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl,
                 EntryPoint = "xmlTextWriterStartElement")]
-            internal static extern int XmlTextWriterStartElement(IntPtr writer, byte* name);
+            internal static extern int XmlTextWriterStartElement(IntPtr writer,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string name);
 
             [SuppressUnmanagedCodeSecurity]
             [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl,
                 EntryPoint = "xmlTextWriterStartElementNS")]
-            internal static extern int XmlTextWriterStartElementNS(IntPtr writer, byte* prefix, byte* name,
-                byte* namespaceURI);
+            internal static extern int XmlTextWriterStartElementNS(IntPtr writer,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string prefix,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string name,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string namespaceURI);
 
             [SuppressUnmanagedCodeSecurity]
             [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl,
                 EntryPoint = "xmlTextWriterStartDTD")]
-            internal static extern int XmlTextWriterStartDTD(IntPtr writer, byte* name, byte* pubid, byte* sysid);
+            internal static extern int XmlTextWriterStartDTD(IntPtr writer,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string name,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string pubid,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string sysid);
             
             [SuppressUnmanagedCodeSecurity]
             [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl,
                 EntryPoint="xmlTextWriterStartDTDEntity")]
-            internal static extern int XmlTextWriterStartDTDEntity(IntPtr writer, int pe, byte* name);
+            internal static extern int XmlTextWriterStartDTDEntity(IntPtr writer, int pe,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string name);
 
             [SuppressUnmanagedCodeSecurity]
             [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl,
                 EntryPoint="xmlTextWriterStartDTDElement")]
-            internal static extern int XmlTextWriterStartDTDElement(IntPtr writer, byte* name);
+            internal static extern int XmlTextWriterStartDTDElement(IntPtr writer,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string name);
 
             [SuppressUnmanagedCodeSecurity]
             [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl,
                 EntryPoint="xmlTextWriterStartDTDAttlist")]
-            internal static extern int XmlTextWriterStartDTDAttlist(IntPtr writer, byte* name);
+            internal static extern int XmlTextWriterStartDTDAttlist(IntPtr writer,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string name);
     
             [SuppressUnmanagedCodeSecurity]
             [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl,
@@ -585,12 +535,16 @@ namespace Peachpie.Library.XmlDom
             [SuppressUnmanagedCodeSecurity]
             [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl,
                 EntryPoint="xmlTextWriterStartAttribute")]
-            internal static extern int XmlTextWriterStartAttribute(IntPtr writer, byte* name);
+            internal static extern int XmlTextWriterStartAttribute(IntPtr writer,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string name);
             
             [SuppressUnmanagedCodeSecurity]
             [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl,
                 EntryPoint="xmlTextWriterStartAttributeNS")]
-            internal static extern int XmlTextWriterStartAttributeNS(IntPtr writer, byte* prefix, byte* name, byte* namespaceURI);
+            internal static extern int XmlTextWriterStartAttributeNS(IntPtr writer,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string prefix,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string name,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string namespaceURI);
 
             [SuppressUnmanagedCodeSecurity]
             [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl,
@@ -600,7 +554,8 @@ namespace Peachpie.Library.XmlDom
             [SuppressUnmanagedCodeSecurity]
             [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl,
                 EntryPoint="xmlTextWriterSetIndentString")]
-            internal static extern int XmlTextWriterSetIndentString(IntPtr writer, byte* str);
+            internal static extern int XmlTextWriterSetIndentString(IntPtr writer,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string str);
 
             [SuppressUnmanagedCodeSecurity]
             [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl,

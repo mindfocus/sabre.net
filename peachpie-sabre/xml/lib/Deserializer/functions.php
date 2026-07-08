@@ -1,7 +1,6 @@
 <?php
 
 
-
 namespace Sabre\Xml\Deserializer;
 
 use Sabre\Xml\Reader;
@@ -55,7 +54,7 @@ use Sabre\Xml\Reader;
  * Attributes will be removed from the top-level elements. If elements with
  * the same name appear twice in the list, only the last one will be kept.
  */
-function keyValue(Reader $reader, string $namespace = null): array
+function keyValue(Reader $reader, ?string $namespace = null): array
 {
     // If there's no children, we don't do anything.
     if ($reader->isEmptyElement) {
@@ -144,7 +143,7 @@ function keyValue(Reader $reader, string $namespace = null): array
  *
  * @return string[]
  */
-function enum(Reader $reader, string $namespace = null): array
+function enum(Reader $reader, ?string $namespace = null): array
 {
     // If there's no children, we don't do anything.
     if ($reader->isEmptyElement) {
@@ -215,8 +214,11 @@ function valueObject(Reader $reader, string $className, string $namespace)
                 // Ignore property
                 $reader->next();
             }
+        } elseif (Reader::ELEMENT === $reader->nodeType) {
+            // Skipping element from different namespace
+            $reader->next();
         } else {
-            if (!$reader->read()) {
+            if (Reader::END_ELEMENT !== $reader->nodeType && !$reader->read()) {
                 break;
             }
         }
@@ -322,8 +324,6 @@ function mixedContent(Reader $reader): array
  *
  * You can use, e.g., a named constructor (factory method) to create an object using
  * this function.
- *
- * @return mixed
  */
 function functionCaller(Reader $reader, callable $func, string $namespace)
 {

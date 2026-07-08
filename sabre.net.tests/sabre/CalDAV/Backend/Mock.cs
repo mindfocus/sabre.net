@@ -1,4 +1,4 @@
-﻿using Pchp.Core;
+using Pchp.Core;
 using Pchp.Library;
 using Sabre.CalDAV.Backend;
 using Sabre.DAV;
@@ -82,7 +82,12 @@ namespace sabre.net.tests.sabre.CalDAV.Backend
             keyv2.Add("VEVENT");
             keyv2.Add("VTODO");
             tempArray.Add("{" + Sabre.CalDAV.Plugin.NS_CALDAV + "}supported-calendar-component-set" , new Sabre.CalDAV.Xml.Property.SupportedCalendarComponentSet(keyv2));
-            calendars = Arrays.array_merge(tempArray, properties);
+            foreach (var entry in properties)
+            {
+                tempArray[entry.Key] = entry.Value;
+            }
+
+            calendars = tempArray;
         return id;
     }
         /**

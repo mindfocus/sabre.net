@@ -1,7 +1,6 @@
 <?php
 
 
-
 namespace Sabre\DAVACL\PrincipalBackend;
 
 use Sabre\DAV\MkCol;

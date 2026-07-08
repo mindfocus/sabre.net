@@ -1,7 +1,6 @@
 <?php
 
 
-
 namespace Sabre\CalDAV\Notifications;
 
 use Sabre\DAV;
@@ -114,7 +113,7 @@ class Plugin extends ServerPlugin
 
         try {
             $node = $this->server->tree->getNodeForPath($path);
-        } catch (DAV\ExceptionNs\NotFound $e) {
+        } catch (DAV\Exception\NotFound $e) {
             return;
         }
 

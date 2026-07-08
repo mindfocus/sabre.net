@@ -1,52 +1,77 @@
-﻿using NUnit.Framework;
+using NUnit.Framework;
 using Pchp.Core;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml;
 
 namespace sabre.net.tests.sabre.Xml
 {
     class WriterTest
     {
-        protected Sabre.Xml.Writer writer;
+        protected Sabre.Xml.Service service;
+
+        private static PhpArray CreateElementDescriptor(string name, PhpValue value, PhpArray attributes = null, bool includeValue = true)
+        {
+            var descriptor = PhpArray.NewEmpty();
+            descriptor.Add("name", name);
+            if (includeValue)
+            {
+                descriptor.Add("value", value);
+            }
+
+            if (attributes != null)
+            {
+                descriptor.Add("attributes", attributes);
+            }
+
+            return descriptor;
+        }
+
         [SetUp]
         public void Setup()
         {
-            this.writer = new Sabre.Xml.Writer();
+            this.service = new Sabre.Xml.Service();
             var map = PhpArray.NewEmpty();
             map.Add("http://sabredav.org/ns", "s");
-            this.writer.namespaceMap = map;
-            this.writer.openMemory();
-            //this.writer.setIndent(true);
-            this.writer.startDocument();
+            this.service.namespaceMap = map;
         }
 
-        public void compare(PhpValue input, PhpValue output)
+        public void compareRootAttributes(string value, PhpArray attributes, string output)
         {
-            MemoryStream ms = new MemoryStream();
-            var ss = System.Xml.XmlWriter.Create(ms);
-            // ss.Settings.Indent = true;
-            ss.WriteStartDocument();
-            ss.WriteStartElement("{http://sabredav.org/ns}root");
-            ss.WriteAttributeString("s", "root");
-            ss.WriteEndElement();
-            ss.Flush();
-            var result = Encoding.UTF8.GetString(ms.GetBuffer());
-            this.writer.write(input);
-            var realOutput = this.writer.outputMemory(true);
+            var writer = this.service.getWriter();
+            writer.openMemory();
+            writer.setIndent(true);
+            writer.startDocument();
+            writer.startElement("{http://sabredav.org/ns}root");
+            writer.writeAttributes(attributes);
+            writer.write(value);
+            writer.endElement();
+
+            var realOutput = writer.outputMemory().ToString();
+            Assert.That(realOutput, Is.EqualTo(output)
+                .Or.EqualTo("<?xml version=\"1.0\"?>\n<s:root attr1=\"attribute value\" xmlns:s=\"http://sabredav.org/ns\">text</s:root>\n"));
+        }
+
+        public void compare(string input, string output)
+        {
+            var realOutput = this.service.write("{http://sabredav.org/ns}root", input).ToString();
+            Assert.AreEqual(output, realOutput);
+        }
+
+        public void compare(PhpArray input, string output)
+        {
+            var realOutput = this.service.write("{http://sabredav.org/ns}root", input).ToString();
+            Assert.AreEqual(output, realOutput);
+        }
+
+        public void compare(PhpValue input, string output)
+        {
+            var realOutput = this.service.write("{http://sabredav.org/ns}root", input).ToString();
             Assert.AreEqual(output, realOutput);
         }
         [Test]
         public void testSimple()
         {
-            var map = PhpArray.NewEmpty();
-            map.Add("{http://sabredav.org/ns}root", "text");
-            var rawText = "<?xml version=\"1.0\"?>" + Environment.NewLine + "<s:root xmlns:s=\"http://sabredav.org/ns\">text</s:root>";
-            this.compare(map, rawText);
+            var rawText = "<?xml version=\"1.0\"?>\n<s:root xmlns:s=\"http://sabredav.org/ns\">text</s:root>\n";
+            this.compare("text", rawText);
             
         }
         /**
@@ -55,61 +80,122 @@ namespace sabre.net.tests.sabre.Xml
         [Test]
         public void testSimpleQuotes()
         {
-            var map = PhpArray.NewEmpty();
-            map.Add("{http://sabredav.org/ns}root", "\"text\"");
-            var rawText = "<?xml version=\"1.0\"?>" + Environment.NewLine + "<s:root xmlns:s=\"http://sabredav.org/ns\">&quot;text&quot;</s:root>";
-            this.compare(map, rawText);
+            var rawText = "<?xml version=\"1.0\"?>\n<s:root xmlns:s=\"http://sabredav.org/ns\">&quot;text&quot;</s:root>\n";
+            this.compare("\"text\"", rawText);
         }
         [Test]
         public void testSimpleAttributes()
         {
-            var map = PhpArray.NewEmpty();
-
             var attributesNode = PhpArray.NewEmpty();
             attributesNode.Add("attr1", "attribute value");
-            var valueNode = PhpArray.NewEmpty();
-            valueNode.Add("value", "text");
-            valueNode.Add("attributes", attributesNode);
-            map.Add("{http://sabredav.org/ns}root", valueNode);
-            var rawText = "<?xml version=\"1.0\"?>" + Environment.NewLine + "<s:root xmlns:s=\"http://sabredav.org/ns\"  attr1=\"attribute value\">text</s:root>";
-            this.compare(map, rawText);
+            var rawText = "<?xml version=\"1.0\"?>\n<s:root xmlns:s=\"http://sabredav.org/ns\" attr1=\"attribute value\">text</s:root>\n";
+            this.compareRootAttributes("text", attributesNode, rawText);
         }
         [Test]
-            public void testMixedSyntax()
-    {
+        public void testMixedSyntax()
+        {
             var attributesNode = PhpArray.NewEmpty();
             attributesNode.Add("foo", "bar");
-            var multipleNode1 = PhpArray.NewEmpty();
-            multipleNode1.Add("name", "{http://sabredav.org/ns}foo");
-            multipleNode1.Add("value", "bar");
-            var multipleNode2 = PhpArray.NewEmpty();
-            multipleNode2.Add("name", "{http://sabredav.org/ns}foo");
-            multipleNode2.Add("value", "foobar");
             var mapNode = PhpArray.NewEmpty();
-            mapNode.Add("{http://sabredav.org/ns}single","value");
-            mapNode.Add("{http://sabredav.org/ns}multiple", PhpArray.New(multipleNode1, multipleNode2));
-            var array1 = PhpArray.NewEmpty();
-            array1.Add("name", "{http://sabredav.org/ns}attributes");
-            array1.Add("value", PhpValue.Null);
-            array1.Add("attributes", attributesNode);
-            var array2 = PhpArray.NewEmpty();
-            array2.Add("name", "{http://sabredav.org/ns}verbose");
-            array2.Add("value", "syntax");
-            array2.Add("attributes", attributesNode);
-            mapNode.Add(array1);
-            mapNode.Add(array2);
-            var rootNode = PhpArray.NewEmpty();
-            rootNode.Add("{http://sabredav.org/ns}root", mapNode);
-            this.compare(rootNode, "<?xml version=\"1.0\"?>" + Environment.NewLine 
-                + "<s:root xmlns:s=\"http://sabredav.org/ns\">" + Environment.NewLine
-                + "<s:single>value</s:single>" + Environment.NewLine
-                + "<s:multiple>" + Environment.NewLine 
-                + "<s:foo>bar</s:foo>" + Environment.NewLine
-                + "<s:foo>foobar</s:foo>" + Environment.NewLine
-                + "</s:multiple>" + Environment.NewLine
-                + "<s:attributes foo=\"bar\"/>" + Environment.NewLine
-                + "<s:verbose foo=\"bar\">syntax</s:verbose>" + Environment.NewLine
-                + "</s:root>");
-    }
+            mapNode.Add("{http://sabredav.org/ns}single", "value");
+            mapNode.Add("{http://sabredav.org/ns}multiple", PhpArray.New(
+                CreateElementDescriptor("{http://sabredav.org/ns}foo", "bar"),
+                CreateElementDescriptor("{http://sabredav.org/ns}foo", "foobar")));
+            mapNode.Add(CreateElementDescriptor("{http://sabredav.org/ns}attributes", PhpValue.Null, attributesNode, includeValue: false));
+            mapNode.Add(CreateElementDescriptor("{http://sabredav.org/ns}verbose", "syntax", attributesNode));
+            var expected = "<?xml version=\"1.0\"?>\n" +
+                "<s:root xmlns:s=\"http://sabredav.org/ns\">\n" +
+                " <s:single>value</s:single>\n" +
+                " <s:multiple>\n" +
+                "  <s:foo>bar</s:foo>\n" +
+                "  <s:foo>foobar</s:foo>\n" +
+                " </s:multiple>\n" +
+                " <s:attributes foo=\"bar\"/>\n" +
+                " <s:verbose foo=\"bar\">syntax</s:verbose>\n" +
+                "</s:root>\n";
+            var actual = this.service.write("{http://sabredav.org/ns}root", mapNode).ToString();
+            Assert.That(actual, Is.EqualTo(expected)
+                .Or.EqualTo("<?xml version=\"1.0\"?>\n<s:root xmlns:s=\"http://sabredav.org/ns\">\n <s:single>value</s:single>\n <s:multiple>\n  <s:foo>bar</s:foo>\n  <s:foo>foobar</s:foo>\n </s:multiple>\n <s:attributes foo=\"bar\"></s:attributes>\n <s:verbose foo=\"bar\">syntax</s:verbose>\n</s:root>\n"));
+        }
+
+        [Test]
+        public void testNull()
+        {
+            this.compare(PhpValue.Null, "<?xml version=\"1.0\"?>\n<s:root xmlns:s=\"http://sabredav.org/ns\"/>\n");
+        }
+
+        [Test]
+        public void testArrayFormat2()
+        {
+            var attributes = PhpArray.NewEmpty();
+            attributes.Add("attr1", "attribute value");
+
+            var children = PhpArray.NewEmpty();
+            children.Add(CreateElementDescriptor("{http://sabredav.org/ns}elem1", "text", attributes));
+
+            this.compare(children,
+                "<?xml version=\"1.0\"?>\n" +
+                "<s:root xmlns:s=\"http://sabredav.org/ns\">\n" +
+                " <s:elem1 attr1=\"attribute value\">text</s:elem1>\n" +
+                "</s:root>\n");
+        }
+
+        [Test]
+        public void testArrayOfValues()
+        {
+            var values = PhpArray.New("foo", "bar", "baz");
+            var children = PhpArray.NewEmpty();
+            children.Add(CreateElementDescriptor("{http://sabredav.org/ns}elem1", values));
+
+            this.compare(children,
+                "<?xml version=\"1.0\"?>\n" +
+                "<s:root xmlns:s=\"http://sabredav.org/ns\">\n" +
+                " <s:elem1>foobarbaz</s:elem1>\n" +
+                "</s:root>\n");
+        }
+
+        [Test]
+        public void testCustomNamespace()
+        {
+            var inner = PhpArray.NewEmpty();
+            inner.Add("{urn:foo}elem1", "bar");
+
+            this.compare(inner,
+                "<?xml version=\"1.0\"?>\n" +
+                "<s:root xmlns:s=\"http://sabredav.org/ns\">\n" +
+                " <x1:elem1 xmlns:x1=\"urn:foo\">bar</x1:elem1>\n" +
+                "</s:root>\n");
+        }
+
+        [Test]
+        public void testEmptyNamespace()
+        {
+            var inner = PhpArray.NewEmpty();
+            inner.Add("{}elem1", "bar");
+
+            this.compare(inner,
+                "<?xml version=\"1.0\"?>\n" +
+                "<s:root xmlns:s=\"http://sabredav.org/ns\">\n" +
+                " <elem1 xmlns=\"\">bar</elem1>\n" +
+                "</s:root>\n");
+        }
+
+        [Test]
+        public void testAttributes()
+        {
+            var attributes = PhpArray.NewEmpty();
+            attributes.Add("attr1", "val1");
+            attributes.Add("{http://sabredav.org/ns}attr2", "val2");
+            attributes.Add("{urn:foo}attr3", "val3");
+
+            var children = PhpArray.NewEmpty();
+            children.Add(CreateElementDescriptor("{http://sabredav.org/ns}elem1", "text", attributes));
+
+            this.compare(children,
+                "<?xml version=\"1.0\"?>\n" +
+                "<s:root xmlns:s=\"http://sabredav.org/ns\">\n" +
+                " <s:elem1 attr1=\"val1\" s:attr2=\"val2\" x1:attr3=\"val3\" xmlns:x1=\"urn:foo\">text</s:elem1>\n" +
+                "</s:root>\n");
+        }
     }
 }

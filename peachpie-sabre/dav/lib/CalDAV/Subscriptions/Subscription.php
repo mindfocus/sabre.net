@@ -1,7 +1,6 @@
 <?php
 
 
-
 namespace Sabre\CalDAV\Subscriptions;
 
 use Sabre\CalDAV\Backend\SubscriptionSupport;
@@ -75,7 +74,7 @@ class Subscription extends Collection implements ISubscription, IACL
     /**
      * Returns the last modification time.
      *
-     * @return int
+     * @return int|null
      */
     public function getLastModified()
     {

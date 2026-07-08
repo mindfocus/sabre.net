@@ -1,17 +1,16 @@
 <?php
 
 
-
 namespace Sabre\CalDAV\Schedule;
 
 use DateTimeZone;
 use Sabre\CalDAV\ICalendar;
 use Sabre\CalDAV\ICalendarObject;
 use Sabre\CalDAV\Xml\Property\ScheduleCalendarTransp;
-use Sabre\DAV\ExceptionNs\BadRequest;
-use Sabre\DAV\ExceptionNs\Forbidden;
-use Sabre\DAV\ExceptionNs\NotFound;
-use Sabre\DAV\ExceptionNs\NotImplemented;
+use Sabre\DAV\Exception\BadRequest;
+use Sabre\DAV\Exception\Forbidden;
+use Sabre\DAV\Exception\NotFound;
+use Sabre\DAV\Exception\NotImplemented;
 use Sabre\DAV\INode;
 use Sabre\DAV\PropFind;
 use Sabre\DAV\PropPatch;
@@ -23,8 +22,9 @@ use Sabre\DAVACL;
 use Sabre\HTTP\RequestInterface;
 use Sabre\HTTP\ResponseInterface;
 use Sabre\VObject;
-use Sabre\VObject\ComponentNs\VCalendar;
+use Sabre\VObject\Component\VCalendar;
 use Sabre\VObject\ITip;
+use Sabre\VObject\ITip\Broker;
 use Sabre\VObject\ITip\Message;
 use Sabre\VObject\Reader;
 
@@ -389,7 +389,7 @@ class Plugin extends ServerPlugin
             $node->getOwner()
         );
 
-        $broker = new ITip\Broker();
+        $broker = $this->createITipBroker();
         $messages = $broker->parseEvent(null, $addresses, $node->get());
 
         foreach ($messages as $message) {
@@ -486,6 +486,7 @@ class Plugin extends ServerPlugin
 
         $currentObject = null;
         $objectNode = null;
+        $oldICalendarData = null;
         $isNewNode = false;
 
         $result = $home->getCalendarObjectByUID($uid);
@@ -499,7 +500,7 @@ class Plugin extends ServerPlugin
             $isNewNode = true;
         }
 
-        $broker = new ITip\Broker();
+        $broker = $this->createITipBroker();
         $newObject = $broker->processMessage($iTipMessage, $currentObject);
 
         $inbox->createFile($newFileName, $iTipMessage->message->serialize());
@@ -604,14 +605,13 @@ class Plugin extends ServerPlugin
      *
      * This method may update $newObject to add any status changes.
      *
-     * @param VCalendar|string $oldObject
-     * @param array            $ignore    any addresses to not send messages to
-     * @param bool             $modified  a marker to indicate that the original object
-     *                                    modified by this process
+     * @param VCalendar|string|null $oldObject
+     * @param array                 $ignore    any addresses to not send messages to
+     * @param bool                  $modified  a marker to indicate that the original object modified by this process
      */
-    protected function processICalendarChange($oldObject = null, VCalendar $newObject, array $addresses, array $ignore = [], &$modified = false)
+    protected function processICalendarChange($oldObject, VCalendar $newObject, array $addresses, array $ignore = [], &$modified = false)
     {
-        $broker = new ITip\Broker();
+        $broker = $this->createITipBroker();
         $messages = $broker->parseEvent($newObject, $addresses, $oldObject);
 
         if ($messages) {
@@ -734,9 +734,7 @@ class Plugin extends ServerPlugin
 
     /**
      * This method is responsible for parsing a free-busy query request and
-     * returning it's result.
-     *
-     * @return string
+     * returning its result in $response.
      */
     protected function handleFreeBusyRequest(IOutbox $outbox, VObject\Component $vObject, RequestInterface $request, ResponseInterface $response)
     {
@@ -778,39 +776,33 @@ class Plugin extends ServerPlugin
             $results[] = $this->getFreeBusyForEmail($attendee, $startRange, $endRange, $vObject);
         }
 
-        $dom = new \DOMDocument('1.0', 'utf-8');
-        $dom->formatOutput = true;
-        $scheduleResponse = $dom->createElement('cal:schedule-response');
-        foreach ($this->server->xml->namespaceMap as $namespace => $prefix) {
-            $scheduleResponse->setAttribute('xmlns:'.$prefix, $namespace);
-        }
-        $dom->appendChild($scheduleResponse);
+        $writer = $this->server->xml->getWriter();
+        $writer->openMemory();
+        $writer->startDocument();
+        $writer->startElement('{'.self::NS_CALDAV.'}schedule-response');
 
         foreach ($results as $result) {
-            $xresponse = $dom->createElement('cal:response');
-
-            $recipient = $dom->createElement('cal:recipient');
-            $recipientHref = $dom->createElement('d:href');
-
-            $recipientHref->appendChild($dom->createTextNode($result['href']));
-            $recipient->appendChild($recipientHref);
-            $xresponse->appendChild($recipient);
-
-            $reqStatus = $dom->createElement('cal:request-status');
-            $reqStatus->appendChild($dom->createTextNode($result['request-status']));
-            $xresponse->appendChild($reqStatus);
+            $writer->startElement('{'.self::NS_CALDAV.'}response');
+            $writer->writeElement('{'.self::NS_CALDAV.'}recipient', [
+                '{DAV:}href' => $result['href'],
+            ]);
+            $writer->writeElement('{'.self::NS_CALDAV.'}request-status', $result['request-status']);
 
             if (isset($result['calendar-data'])) {
-                $calendardata = $dom->createElement('cal:calendar-data');
-                $calendardata->appendChild($dom->createTextNode(str_replace("\r\n", "\n", $result['calendar-data']->serialize())));
-                $xresponse->appendChild($calendardata);
+                $writer->writeElement(
+                    '{'.self::NS_CALDAV.'}calendar-data',
+                    str_replace("\r\n", "\n", $result['calendar-data']->serialize())
+                );
             }
-            $scheduleResponse->appendChild($xresponse);
+
+            $writer->endElement();
         }
+
+        $writer->endElement();
 
         $response->setStatus(200);
         $response->setHeader('Content-Type', 'application/xml');
-        $response->setBody($dom->saveXML());
+        $response->setBody($writer->outputMemory());
     }
 
     /**
@@ -934,7 +926,7 @@ class Plugin extends ServerPlugin
             $caldavNS.'calendar-availability'
         );
 
-        $vcalendar = new VObject\ComponentNs\VCalendar();
+        $vcalendar = new VObject\Component\VCalendar();
         $vcalendar->METHOD = 'REPLY';
 
         $generator = new VObject\FreeBusyGenerator();
@@ -970,7 +962,7 @@ class Plugin extends ServerPlugin
      *
      * @return bool
      */
-    private function scheduleReply(RequestInterface $request)
+    protected function scheduleReply(RequestInterface $request)
     {
         $scheduleReply = $request->getHeader('Schedule-Reply');
 
@@ -995,5 +987,13 @@ class Plugin extends ServerPlugin
             'description' => 'Adds calendar-auto-schedule, as defined in rfc6638',
             'link' => 'http://sabre.io/dav/scheduling/',
         ];
+    }
+
+    /**
+     * Returns an instance of the iTip\Broker.
+     */
+    protected function createITipBroker(): Broker
+    {
+        return new Broker();
     }
 }

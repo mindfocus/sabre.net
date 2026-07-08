@@ -1,7 +1,6 @@
 <?php
 
 
-
 namespace Sabre\DAVACL\FS;
 
 use Sabre\DAV\FSExt\File as BaseFile;

@@ -1,7 +1,6 @@
 <?php
 
 
-
 namespace Sabre\CardDAV;
 
 use Sabre\DAV;
@@ -64,7 +63,7 @@ class AddressBook extends DAV\Collection implements IAddressBook, DAV\IPropertie
     {
         $obj = $this->carddavBackend->getCard($this->addressBookInfo['id'], $name);
         if (!$obj) {
-            throw new DAV\ExceptionNs\NotFound('Card not found');
+            throw new DAV\Exception\NotFound('Card not found');
         }
 
         return new Card($this->carddavBackend, $this->addressBookInfo, $obj);
@@ -118,7 +117,7 @@ class AddressBook extends DAV\Collection implements IAddressBook, DAV\IPropertie
      */
     public function createDirectory($name)
     {
-        throw new DAV\ExceptionNs\MethodNotAllowed('Creating collections in addressbooks is not allowed');
+        throw new DAV\Exception\MethodNotAllowed('Creating collections in addressbooks is not allowed');
     }
 
     /**
@@ -129,19 +128,19 @@ class AddressBook extends DAV\Collection implements IAddressBook, DAV\IPropertie
      * This method may return an ETag.
      *
      * @param string   $name
-     * @param resource $vcardData
+     * @param resource $data
      *
      * @return string|null
      */
-    public function createFile($name, $vcardData = null)
+    public function createFile($name, $data = null)
     {
-        if (is_resource($vcardData)) {
-            $vcardData = stream_get_contents($vcardData);
+        if (is_resource($data)) {
+            $data = stream_get_contents($data);
         }
         // Converting to UTF-8, if needed
-        $vcardData = DAV\StringUtil::ensureUTF8($vcardData);
+        $data = DAV\StringUtil::ensureUTF8($data);
 
-        return $this->carddavBackend->createCard($this->addressBookInfo['id'], $name, $vcardData);
+        return $this->carddavBackend->createCard($this->addressBookInfo['id'], $name, $data);
     }
 
     /**
@@ -159,7 +158,7 @@ class AddressBook extends DAV\Collection implements IAddressBook, DAV\IPropertie
      */
     public function setName($newName)
     {
-        throw new DAV\ExceptionNs\MethodNotAllowed('Renaming addressbooks is not yet supported');
+        throw new DAV\Exception\MethodNotAllowed('Renaming addressbooks is not yet supported');
     }
 
     /**
@@ -317,7 +316,7 @@ class AddressBook extends DAV\Collection implements IAddressBook, DAV\IPropertie
      * @param int    $syncLevel
      * @param int    $limit
      *
-     * @return array
+     * @return array|null
      */
     public function getChanges($syncToken, $syncLevel, $limit = null)
     {

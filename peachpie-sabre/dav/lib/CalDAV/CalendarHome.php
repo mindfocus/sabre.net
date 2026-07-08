@@ -1,11 +1,10 @@
 <?php
 
 
-
 namespace Sabre\CalDAV;
 
 use Sabre\DAV;
-use Sabre\DAV\ExceptionNs\NotFound;
+use Sabre\DAV\Exception\NotFound;
 use Sabre\DAV\MkCol;
 use Sabre\DAVACL;
 use Sabre\Uri;
@@ -70,7 +69,7 @@ class CalendarHome implements DAV\IExtendedCollection, DAVACL\IACL
      */
     public function setName($name)
     {
-        throw new DAV\ExceptionNs\Forbidden();
+        throw new DAV\Exception\Forbidden();
     }
 
     /**
@@ -78,7 +77,7 @@ class CalendarHome implements DAV\IExtendedCollection, DAVACL\IACL
      */
     public function delete()
     {
-        throw new DAV\ExceptionNs\Forbidden();
+        throw new DAV\Exception\Forbidden();
     }
 
     /**
@@ -96,12 +95,12 @@ class CalendarHome implements DAV\IExtendedCollection, DAVACL\IACL
      *
      * This is currently not allowed
      *
-     * @param string   $filename
+     * @param string   $name
      * @param resource $data
      */
-    public function createFile($filename, $data = null)
+    public function createFile($name, $data = null)
     {
-        throw new DAV\ExceptionNs\MethodNotAllowed('Creating new files in this collection is not supported');
+        throw new DAV\Exception\MethodNotAllowed('Creating new files in this collection is not supported');
     }
 
     /**
@@ -113,7 +112,7 @@ class CalendarHome implements DAV\IExtendedCollection, DAVACL\IACL
      */
     public function createDirectory($filename)
     {
-        throw new DAV\ExceptionNs\MethodNotAllowed('Creating new collections in this collection is not supported');
+        throw new DAV\Exception\MethodNotAllowed('Creating new collections in this collection is not supported');
     }
 
     /**
@@ -235,7 +234,7 @@ class CalendarHome implements DAV\IExtendedCollection, DAVACL\IACL
                     $isSubscription = true;
                     break;
                 default:
-                    throw new DAV\ExceptionNs\InvalidResourceType('Unknown resourceType: '.$rt);
+                    throw new DAV\Exception\InvalidResourceType('Unknown resourceType: '.$rt);
             }
         }
 
@@ -244,13 +243,13 @@ class CalendarHome implements DAV\IExtendedCollection, DAVACL\IACL
 
         if ($isSubscription) {
             if (!$this->caldavBackend instanceof Backend\SubscriptionSupport) {
-                throw new DAV\ExceptionNs\InvalidResourceType('This backend does not support subscriptions');
+                throw new DAV\Exception\InvalidResourceType('This backend does not support subscriptions');
             }
             $this->caldavBackend->createSubscription($this->principalInfo['uri'], $name, $properties);
         } elseif ($isCalendar) {
             $this->caldavBackend->createCalendar($this->principalInfo['uri'], $name, $properties);
         } else {
-            throw new DAV\ExceptionNs\InvalidResourceType('You can only create calendars and subscriptions in this collection');
+            throw new DAV\Exception\InvalidResourceType('You can only create calendars and subscriptions in this collection');
         }
     }
 
@@ -324,7 +323,7 @@ class CalendarHome implements DAV\IExtendedCollection, DAVACL\IACL
     public function shareReply($href, $status, $calendarUri, $inReplyTo, $summary = null)
     {
         if (!$this->caldavBackend instanceof Backend\SharingSupport) {
-            throw new DAV\ExceptionNs\NotImplemented('Sharing support is not implemented by this backend.');
+            throw new DAV\Exception\NotImplemented('Sharing support is not implemented by this backend.');
         }
 
         return $this->caldavBackend->shareReply($href, $status, $calendarUri, $inReplyTo, $summary);

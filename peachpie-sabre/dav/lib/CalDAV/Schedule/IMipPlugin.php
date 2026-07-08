@@ -1,7 +1,6 @@
 <?php
 
 
-
 namespace Sabre\CalDAV\Schedule;
 
 use Sabre\DAV;
@@ -29,13 +28,6 @@ class IMipPlugin extends DAV\ServerPlugin
      * @var string
      */
     protected $senderEmail;
-
-    /**
-     * ITipMessage.
-     *
-     * @var ITip\Message
-     */
-    protected $itipMessage;
 
     /**
      * Creates the email handler.

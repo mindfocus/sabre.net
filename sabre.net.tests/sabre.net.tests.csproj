@@ -1,7 +1,7 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
 
     <IsPackable>false</IsPackable>
 
@@ -10,14 +10,21 @@
 
   <ItemGroup>
     <PackageReference Include="Moq" Version="4.16.1" />
-    <PackageReference Include="nunit" Version="3.12.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.6.1" />
-    <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
+    <PackageReference Include="nunit" Version="3.14.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
+    <PackageReference Include="Peachpie.Library.Scripting" Version="1.1.13" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\peachpie-sabre\sabre.net.msbuildproj" />
-    <ProjectReference Include="..\sabre.net.bridge\sabre.net.bridge.csproj" />
+    <!--
+      直接引用 runtimepatch，使 C# 反射类测试（如 VEventTest）可在 [OneTimeSetUp]
+      中显式调用 DateTimeModifyPatch.EnsureApplied()。
+      这类测试不经过 PHP 脚本路径，无法依赖 \nextsharp_sabre_runtime_patch_bootstrap()
+      的 PHP 可见入口触发，必须由宿主侧显式装配。
+    -->
+    <ProjectReference Include="..\sabre.net.runtimepatch\sabre.net.runtimepatch.csproj" />
   </ItemGroup>
 
 </Project>

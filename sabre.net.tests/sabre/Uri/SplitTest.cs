@@ -1,5 +1,6 @@
-﻿using NUnit.Framework;
+using NUnit.Framework;
 using Pchp.Core;
+using Pchp.Core.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,13 @@ namespace sabre.net.tests.sabre.Uri
 {
     class SplitTest
     {
+        private static PhpArray SplitUri(string path)
+        {
+            var uriFunctions = typeof(Sabre.Uri.Version).Assembly.GetType("<Root>uri/lib.functions_php", throwOnError: true);
+            return (PhpArray)uriFunctions.GetMethod("Sabre.Uri.split")
+                .Invoke(null, new object[] { ContextExtensions.CurrentContext, new PhpString(path) });
+        }
+
         [Test]
         public void testSplit()
     {
@@ -30,10 +38,9 @@ namespace sabre.net.tests.sabre.Uri
             //"/\xC3\xA0fo\xC3\xB3/bar" => ["/\xC3\xA0fo\xC3\xB3", 'bar'],
             //"/\xC3\xA0foo/b\xC3\xBCr/" => ["/\xC3\xA0foo", "b\xC3\xBCr"],
             //"foo/\xC3\xA0\xC3\xBCr" => ['foo', "\xC3\xA0\xC3\xBCr"],
-            var func = new Sabre.Uri.UriFunctions();
             foreach (var str in strings)
             {
-                var output = func.split(str.Key.String);
+                var output = SplitUri(str.Key.String);
                 Assert.AreEqual(str.Value, output);
             }
     }

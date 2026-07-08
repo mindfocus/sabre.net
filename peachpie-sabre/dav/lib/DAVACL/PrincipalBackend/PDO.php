@@ -1,7 +1,6 @@
 <?php
 
 
-
 namespace Sabre\DAVACL\PrincipalBackend;
 
 use Sabre\DAV;
@@ -80,7 +79,7 @@ class PDO extends AbstractBackend implements CreatePrincipalSupport
      * return any additional properties if you wish so. Common properties are:
      *   {DAV:}displayname
      *   {http://sabredav.org/ns}email-address - This is a custom SabreDAV
-     *     field that's actualy injected in a number of other properties. If
+     *     field that's actually injected in a number of other properties. If
      *     you have an email address, use this property.
      *
      * @param string $prefixPath

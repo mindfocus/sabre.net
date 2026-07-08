@@ -1,7 +1,6 @@
 <?php
 
 
-
 namespace Sabre\CalDAV\Xml\Property;
 
 use Sabre\CalDAV\Plugin;

@@ -1,11 +1,10 @@
 <?php
 
 
-
 namespace Sabre\CalDAV\Schedule;
 
 use Sabre\CalDAV\Backend;
-use Sabre\DAV\ExceptionNs\MethodNotAllowed;
+use Sabre\DAV\Exception\MethodNotAllowed;
 
 /**
  * The SchedulingObject represents a scheduling object in the Inbox collection.

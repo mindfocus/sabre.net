@@ -1,7 +1,6 @@
 <?php
 
 
-
 namespace Sabre\DAV;
 
 /**
@@ -39,7 +38,7 @@ abstract class File extends Node implements IFile
      */
     public function put($data)
     {
-        throw new ExceptionNs\Forbidden('Permission denied to change data');
+        throw new Exception\Forbidden('Permission denied to change data');
     }
 
     /**
@@ -51,7 +50,7 @@ abstract class File extends Node implements IFile
      */
     public function get()
     {
-        throw new ExceptionNs\Forbidden('Permission denied to read this file');
+        throw new Exception\Forbidden('Permission denied to read this file');
     }
 
     /**

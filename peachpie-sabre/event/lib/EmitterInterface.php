@@ -1,7 +1,6 @@
 <?php
 
 
-
 namespace Sabre\Event;
 
 /**
@@ -47,7 +46,7 @@ interface EmitterInterface
      * Lastly, if there are 5 event handlers for an event. The continueCallback
      * will be called at most 4 times.
      */
-    public function emit(string $eventName, array $arguments = [], callable $continueCallBack = null): bool;
+    public function emit(string $eventName, array $arguments = [], ?callable $continueCallBack = null): bool;
 
     /**
      * Returns the list of listeners for an event.
@@ -74,5 +73,5 @@ interface EmitterInterface
      * removed. If it is not specified, every listener for every event is
      * removed.
      */
-    public function removeAllListeners(string $eventName = null);
+    public function removeAllListeners(?string $eventName = null);
 }

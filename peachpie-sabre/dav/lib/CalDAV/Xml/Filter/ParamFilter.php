@@ -1,7 +1,6 @@
 <?php
 
 
-
 namespace Sabre\CalDAV\Xml\Filter;
 
 use Sabre\CalDAV\Plugin;

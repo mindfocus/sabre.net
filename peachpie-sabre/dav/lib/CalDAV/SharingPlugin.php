@@ -1,7 +1,6 @@
 <?php
 
 
-
 namespace Sabre\CalDAV;
 
 use Sabre\DAV;
@@ -136,7 +135,7 @@ class SharingPlugin extends DAV\ServerPlugin
     }
 
     /**
-     * This method is trigged when a user attempts to update a node's
+     * This method is triggered when a user attempts to update a node's
      * properties.
      *
      * A previous draft of the sharing spec stated that it was possible to use
@@ -192,7 +191,7 @@ class SharingPlugin extends DAV\ServerPlugin
         // Making sure the node exists
         try {
             $node = $this->server->tree->getNodeForPath($path);
-        } catch (DAV\ExceptionNs\NotFound $e) {
+        } catch (DAV\Exception\NotFound $e) {
             return;
         }
 
@@ -213,7 +212,6 @@ class SharingPlugin extends DAV\ServerPlugin
             // Both the DAV:share-resource and CALENDARSERVER:share requests
             // behave identically.
             case '{'.Plugin::NS_CALENDARSERVER.'}share':
-
                 $sharingPlugin = $this->server->getPlugin('sharing');
                 $sharingPlugin->shareResource($path, $message->sharees);
 
@@ -228,7 +226,6 @@ class SharingPlugin extends DAV\ServerPlugin
             // The invite-reply document is sent when the user replies to an
             // invitation of a calendar share.
             case '{'.Plugin::NS_CALENDARSERVER.'}invite-reply':
-
                 // This only works on the calendar-home-root node.
                 if (!$node instanceof CalendarHome) {
                     return;
@@ -272,7 +269,6 @@ class SharingPlugin extends DAV\ServerPlugin
                 return false;
 
             case '{'.Plugin::NS_CALENDARSERVER.'}publish-calendar':
-
                 // We can only deal with IShareableCalendar objects
                 if (!$node instanceof ISharedCalendar) {
                     return;
@@ -300,7 +296,6 @@ class SharingPlugin extends DAV\ServerPlugin
                 return false;
 
             case '{'.Plugin::NS_CALENDARSERVER.'}unpublish-calendar':
-
                 // We can only deal with IShareableCalendar objects
                 if (!$node instanceof ISharedCalendar) {
                     return;

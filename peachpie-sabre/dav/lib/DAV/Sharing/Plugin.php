@@ -1,11 +1,10 @@
 <?php
 
 
-
 namespace Sabre\DAV\Sharing;
 
-use Sabre\DAV\ExceptionNs\BadRequest;
-use Sabre\DAV\ExceptionNs\Forbidden;
+use Sabre\DAV\Exception\BadRequest;
+use Sabre\DAV\Exception\Forbidden;
 use Sabre\DAV\INode;
 use Sabre\DAV\PropFind;
 use Sabre\DAV\Server;
@@ -179,7 +178,6 @@ class Plugin extends ServerPlugin
 
         switch ($documentType) {
             case '{DAV:}share-resource':
-
                 $this->shareResource($path, $message->sharees);
                 $response->setStatus(200);
                 // Adding this because sending a response body may cause issues,
@@ -195,7 +193,7 @@ class Plugin extends ServerPlugin
     }
 
     /**
-     * This method is triggered whenever a subsystem reqeuests the privileges
+     * This method is triggered whenever a subsystem requests the privileges
      * hat are supported on a particular node.
      *
      * We need to add a number of privileges for scheduling purposes.

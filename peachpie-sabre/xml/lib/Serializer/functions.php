@@ -1,10 +1,8 @@
 <?php
 
 
-
 namespace Sabre\Xml\Serializer;
 
-use InvalidArgumentException;
 use Sabre\Xml\Writer;
 use Sabre\Xml\XmlSerializable;
 
@@ -148,7 +146,6 @@ function repeatingElements(Writer $writer, array $items, string $childElementNam
  *
  * You can even mix the two array syntaxes.
  *
- * @param Writer                             $writer
  * @param string|int|float|bool|array|object $value
  */
 function standardSerializer(Writer $writer, $value)
@@ -165,8 +162,6 @@ function standardSerializer(Writer $writer, $value)
     } elseif (is_callable($value)) {
         // A callback
         $value($writer);
-    } elseif (is_null($value)) {
-        // nothing!
     } elseif (is_array($value) && array_key_exists('name', $value)) {
         // if the array had a 'name' element, we assume that this array
         // describes a 'name' and optionally 'attributes' and 'value'.
@@ -200,12 +195,12 @@ function standardSerializer(Writer $writer, $value)
                 $writer->write($item);
                 $writer->endElement();
             } else {
-                throw new InvalidArgumentException('The writer does not know how to serialize arrays with keys of type: '.gettype($name));
+                throw new \InvalidArgumentException('The writer does not know how to serialize arrays with keys of type: '.gettype($name));
             }
         }
     } elseif (is_object($value)) {
-        throw new InvalidArgumentException('The writer cannot serialize objects of class: '.get_class($value));
-    } else {
-        throw new InvalidArgumentException('The writer cannot serialize values of type: '.gettype($value));
+        throw new \InvalidArgumentException('The writer cannot serialize objects of class: '.get_class($value));
+    } elseif (!is_null($value)) {
+        throw new \InvalidArgumentException('The writer cannot serialize values of type: '.gettype($value));
     }
 }

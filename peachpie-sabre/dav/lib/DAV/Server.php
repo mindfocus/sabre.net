@@ -1,7 +1,6 @@
 <?php
 
 
-
 namespace Sabre\DAV;
 
 use Psr\Log\LoggerAwareInterface;
@@ -25,8 +24,27 @@ use Sabre\Xml\Writer;
  */
 class Server implements LoggerAwareInterface, EmitterInterface
 {
-    use WildcardEmitterTrait;
     use LoggerAwareTrait;
+    use WildcardEmitterTrait {
+        WildcardEmitterTrait::once as traitOnce;
+        WildcardEmitterTrait::on as traitOn;
+        WildcardEmitterTrait::removeAllListeners as traitRemoveAllListeners;
+    }
+
+    public function once(string $eventName, callable $callBack, int $priority = 100): void
+    {
+        $this->traitOnce($eventName, $callBack, $priority);
+    }
+
+    public function on(string $eventName, callable $callBack, int $priority = 100): void
+    {
+        $this->traitOn($eventName, $callBack, $priority);
+    }
+
+    public function removeAllListeners(?string $eventName = null): void
+    {
+        $this->traitRemoveAllListeners($eventName);
+    }
 
     /**
      * Infinity is used for some request supporting the HTTP Depth header and indicates that the operation should traverse the entire tree.
@@ -208,8 +226,10 @@ class Server implements LoggerAwareInterface, EmitterInterface
      * the nodes in the array as top-level children.
      *
      * @param Tree|INode|array|null $treeOrNode The tree object
+     *
+     * @throws Exception
      */
-    public function __construct($treeOrNode = null)
+    public function __construct($treeOrNode = null, ?HTTP\Sapi $sapi = null)
     {
         if ($treeOrNode instanceof Tree) {
             $this->tree = $treeOrNode;
@@ -226,7 +246,7 @@ class Server implements LoggerAwareInterface, EmitterInterface
         }
 
         $this->xml = new Xml\Service();
-        $this->sapi = new HTTP\Sapi();
+        $this->sapi = $sapi ?? new HTTP\Sapi();
         $this->httpResponse = new HTTP\Response();
         $this->httpRequest = $this->sapi->getRequest();
         $this->addPlugin(new CorePlugin());
@@ -254,57 +274,52 @@ class Server implements LoggerAwareInterface, EmitterInterface
                 $this->emit('exception', [$e]);
             } catch (\Exception $ignore) {
             }
-            $DOM = new \DOMDocument('1.0', 'utf-8');
-            $DOM->formatOutput = true;
-
-            $error = $DOM->createElementNS('DAV:', 'd:error');
-            $error->setAttribute('xmlns:s', self::NS_SABREDAV);
-            $DOM->appendChild($error);
-
-            $h = function ($v) {
-                return htmlspecialchars((string) $v, ENT_NOQUOTES, 'UTF-8');
-            };
+            $writer = $this->xml->getWriter();
+            $writer->openMemory();
+            $writer->startDocument();
+            $writer->startElement('{DAV:}error');
 
             if (self::$exposeVersion) {
-                $error->appendChild($DOM->createElement('s:sabredav-version', $h(Version::VERSION)));
+                $writer->writeElement('{'.self::NS_SABREDAV.'}sabredav-version', Version::VERSION);
             }
 
-            $error->appendChild($DOM->createElement('s:exception', $h(get_class($e))));
-            $error->appendChild($DOM->createElement('s:message', $h($e->getMessage())));
+            $writer->writeElement('{'.self::NS_SABREDAV.'}exception', get_class($e));
+            $writer->writeElement('{'.self::NS_SABREDAV.'}message', $e->getMessage());
             if ($this->debugExceptions) {
-                $error->appendChild($DOM->createElement('s:file', $h($e->getFile())));
-                $error->appendChild($DOM->createElement('s:line', $h($e->getLine())));
-                $error->appendChild($DOM->createElement('s:code', $h($e->getCode())));
-                $error->appendChild($DOM->createElement('s:stacktrace', $h($e->getTraceAsString())));
+                $writer->writeElement('{'.self::NS_SABREDAV.'}file', (string) $e->getFile());
+                $writer->writeElement('{'.self::NS_SABREDAV.'}line', (string) $e->getLine());
+                $writer->writeElement('{'.self::NS_SABREDAV.'}code', (string) $e->getCode());
+                $writer->writeElement('{'.self::NS_SABREDAV.'}stacktrace', $e->getTraceAsString());
             }
 
             if ($this->debugExceptions) {
                 $previous = $e;
                 while ($previous = $previous->getPrevious()) {
-                    $xPrevious = $DOM->createElement('s:previous-exception');
-                    $xPrevious->appendChild($DOM->createElement('s:exception', $h(get_class($previous))));
-                    $xPrevious->appendChild($DOM->createElement('s:message', $h($previous->getMessage())));
-                    $xPrevious->appendChild($DOM->createElement('s:file', $h($previous->getFile())));
-                    $xPrevious->appendChild($DOM->createElement('s:line', $h($previous->getLine())));
-                    $xPrevious->appendChild($DOM->createElement('s:code', $h($previous->getCode())));
-                    $xPrevious->appendChild($DOM->createElement('s:stacktrace', $h($previous->getTraceAsString())));
-                    $error->appendChild($xPrevious);
+                    $writer->writeElement('{'.self::NS_SABREDAV.'}previous-exception', [
+                        '{'.self::NS_SABREDAV.'}exception' => get_class($previous),
+                        '{'.self::NS_SABREDAV.'}message' => $previous->getMessage(),
+                        '{'.self::NS_SABREDAV.'}file' => (string) $previous->getFile(),
+                        '{'.self::NS_SABREDAV.'}line' => (string) $previous->getLine(),
+                        '{'.self::NS_SABREDAV.'}code' => (string) $previous->getCode(),
+                        '{'.self::NS_SABREDAV.'}stacktrace' => $previous->getTraceAsString(),
+                    ]);
                 }
             }
 
             if ($e instanceof Exception) {
                 $httpCode = $e->getHTTPCode();
-                $e->serialize($this, $error);
+                $e->serialize($this, $writer);
                 $headers = $e->getHTTPHeaders($this);
             } else {
                 $httpCode = 500;
                 $headers = [];
             }
             $headers['Content-Type'] = 'application/xml; charset=utf-8';
+            $writer->endElement();
 
             $this->httpResponse->setStatus($httpCode);
             $this->httpResponse->setHeaders($headers);
-            $this->httpResponse->setBody($DOM->saveXML());
+            $this->httpResponse->setBody($writer->outputMemory());
             $this->sapi->sendResponse($this->httpResponse);
         }
     }
@@ -474,7 +489,7 @@ class Server implements LoggerAwareInterface, EmitterInterface
             }
 
             // Unsupported method
-            throw new ExceptionNs\NotImplemented($exMessage);
+            throw new Exception\NotImplemented($exMessage);
         }
 
         if (!$this->emit('afterMethod:'.$method, [$request, $response])) {
@@ -517,7 +532,7 @@ class Server implements LoggerAwareInterface, EmitterInterface
         // The MKCOL is only allowed on an unmapped uri
         try {
             $this->tree->getNodeForPath($path);
-        } catch (ExceptionNs\NotFound $e) {
+        } catch (Exception\NotFound $e) {
             $methods[] = 'MKCOL';
         }
 
@@ -571,7 +586,7 @@ class Server implements LoggerAwareInterface, EmitterInterface
         } elseif ($uri.'/' === $baseUri) {
             return '';
         } else {
-            throw new ExceptionNs\Forbidden('Requested uri ('.$uri.') is out of base uri ('.$this->getBaseUri().')');
+            throw new Exception\Forbidden('Requested uri ('.$uri.') is out of base uri ('.$this->getBaseUri().')');
         }
     }
 
@@ -720,7 +735,7 @@ class Server implements LoggerAwareInterface, EmitterInterface
     {
         // Collecting the relevant HTTP headers
         if (!$request->getHeader('Destination')) {
-            throw new ExceptionNs\BadRequest('The destination header was not supplied');
+            throw new Exception\BadRequest('The destination header was not supplied');
         }
         $destination = $this->calculateUri($request->getHeader('Destination'));
         $overwrite = $request->getHeader('Overwrite');
@@ -734,18 +749,18 @@ class Server implements LoggerAwareInterface, EmitterInterface
         }
         // We need to throw a bad request exception, if the header was invalid
         else {
-            throw new ExceptionNs\BadRequest('The HTTP Overwrite header should be either T or F');
+            throw new Exception\BadRequest('The HTTP Overwrite header should be either T or F');
         }
         list($destinationDir) = Uri\split($destination);
 
         try {
             $destinationParent = $this->tree->getNodeForPath($destinationDir);
             if (!($destinationParent instanceof ICollection)) {
-                throw new ExceptionNs\UnsupportedMediaType('The destination node is not a collection');
+                throw new Exception\UnsupportedMediaType('The destination node is not a collection');
             }
-        } catch (ExceptionNs\NotFound $e) {
+        } catch (Exception\NotFound $e) {
             // If the destination parent node is not found, we throw a 409
-            throw new ExceptionNs\Conflict('The destination node is not found');
+            throw new Exception\Conflict('The destination node is not found');
         }
 
         try {
@@ -754,19 +769,19 @@ class Server implements LoggerAwareInterface, EmitterInterface
             // If this succeeded, it means the destination already exists
             // we'll need to throw precondition failed in case overwrite is false
             if (!$overwrite) {
-                throw new ExceptionNs\PreconditionFailed('The destination node already exists, and the overwrite header is set to false', 'Overwrite');
+                throw new Exception\PreconditionFailed('The destination node already exists, and the overwrite header is set to false', 'Overwrite');
             }
-        } catch (ExceptionNs\NotFound $e) {
+        } catch (Exception\NotFound $e) {
             // Destination didn't exist, we're all good
             $destinationNode = false;
         }
 
         $requestPath = $request->getPath();
         if ($destination === $requestPath) {
-            throw new ExceptionNs\Forbidden('Source and destination uri are identical.');
+            throw new Exception\Forbidden('Source and destination uri are identical.');
         }
         if (substr($destination, 0, strlen($requestPath) + 1) === $requestPath.'/') {
-            throw new ExceptionNs\Conflict('The destination may not be part of the same subtree as the source path.');
+            throw new Exception\Conflict('The destination may not be part of the same subtree as the source path.');
         }
 
         // These are the three relevant properties we need to return
@@ -880,7 +895,7 @@ class Server implements LoggerAwareInterface, EmitterInterface
      *
      * @return \Traversable
      */
-    private function generatePathNodes(PropFind $propFind, array $yieldFirst = null)
+    private function generatePathNodes(PropFind $propFind, ?array $yieldFirst = null)
     {
         if (null !== $yieldFirst) {
             yield $yieldFirst;
@@ -893,7 +908,7 @@ class Server implements LoggerAwareInterface, EmitterInterface
         }
 
         $propertyNames = $propFind->getRequestedProperties();
-        $propFindType = !empty($propertyNames) ? PropFind::NORMAL : PropFind::ALLPROPS;
+        $propFindType = !$propFind->isAllProps() ? PropFind::NORMAL : PropFind::ALLPROPS;
 
         foreach ($this->tree->getChildren($path) as $childNode) {
             if ('' !== $path) {
@@ -1073,9 +1088,14 @@ class Server implements LoggerAwareInterface, EmitterInterface
             return false;
         }
 
-        $parent = $this->tree->getNodeForPath($dir);
+        try {
+            $parent = $this->tree->getNodeForPath($dir);
+        } catch (Exception\NotFound $e) {
+            throw new Exception\Conflict('Files cannot be created in non-existent collections');
+        }
+
         if (!$parent instanceof ICollection) {
-            throw new ExceptionNs\Conflict('Files can only be created as children of collections');
+            throw new Exception\Conflict('Files can only be created as children of collections');
         }
 
         // It is possible for an event handler to modify the content of the
@@ -1160,13 +1180,13 @@ class Server implements LoggerAwareInterface, EmitterInterface
         // Making sure the parent exists
         try {
             $parent = $this->tree->getNodeForPath($parentUri);
-        } catch (ExceptionNs\NotFound $e) {
-            throw new ExceptionNs\Conflict('Parent node does not exist');
+        } catch (Exception\NotFound $e) {
+            throw new Exception\Conflict('Parent node does not exist');
         }
 
         // Making sure the parent is a collection
         if (!$parent instanceof ICollection) {
-            throw new ExceptionNs\Conflict('Parent node is not a collection');
+            throw new Exception\Conflict('Parent node is not a collection');
         }
 
         // Making sure the child does not already exist
@@ -1174,8 +1194,8 @@ class Server implements LoggerAwareInterface, EmitterInterface
             $parent->getChild($newName);
 
             // If we got here.. it means there's already a node on that url, and we need to throw a 405
-            throw new ExceptionNs\MethodNotAllowed('The resource you tried to create already exists');
-        } catch (ExceptionNs\NotFound $e) {
+            throw new Exception\MethodNotAllowed('The resource you tried to create already exists');
+        } catch (Exception\NotFound $e) {
             // NotFound is the expected behavior.
         }
 
@@ -1197,7 +1217,7 @@ class Server implements LoggerAwareInterface, EmitterInterface
              * MKCOL operation that carries extra resourcetypes.
              */
             if (count($mkCol->getResourceType()) > 1) {
-                throw new ExceptionNs\InvalidResourceType('The {DAV:}resourcetype you specified is not supported here.');
+                throw new Exception\InvalidResourceType('The {DAV:}resourcetype you specified is not supported here.');
             }
 
             $parent->createDirectory($newName);
@@ -1230,6 +1250,7 @@ class Server implements LoggerAwareInterface, EmitterInterface
 
         $this->tree->markDirty($parentUri);
         $this->emit('afterBind', [$uri]);
+        $this->emit('afterCreateCollection', [$uri]);
     }
 
     /**
@@ -1292,8 +1313,8 @@ class Server implements LoggerAwareInterface, EmitterInterface
             // request succeed if a resource exists at that url.
             try {
                 $node = $this->tree->getNodeForPath($path);
-            } catch (ExceptionNs\NotFound $e) {
-                throw new ExceptionNs\PreconditionFailed('An If-Match header was specified and the resource did not exist', 'If-Match');
+            } catch (Exception\NotFound $e) {
+                throw new Exception\PreconditionFailed('An If-Match header was specified and the resource did not exist', 'If-Match');
             }
 
             // Only need to check entity tags if they are not *
@@ -1320,7 +1341,7 @@ class Server implements LoggerAwareInterface, EmitterInterface
                     if ($etag) {
                         $response->setHeader('ETag', $etag);
                     }
-                    throw new ExceptionNs\PreconditionFailed('An If-Match header was specified, but none of the specified ETags matched.', 'If-Match');
+                    throw new Exception\PreconditionFailed('An If-Match header was specified, but none of the specified ETags matched.', 'If-Match');
                 }
             }
         }
@@ -1334,7 +1355,7 @@ class Server implements LoggerAwareInterface, EmitterInterface
             if (!$node) {
                 try {
                     $node = $this->tree->getNodeForPath($path);
-                } catch (ExceptionNs\NotFound $e) {
+                } catch (Exception\NotFound $e) {
                     $nodeExists = false;
                 }
             }
@@ -1366,7 +1387,7 @@ class Server implements LoggerAwareInterface, EmitterInterface
 
                         return false;
                     } else {
-                        throw new ExceptionNs\PreconditionFailed('An If-None-Match header was specified, but the ETag matched (or * was specified).', 'If-None-Match');
+                        throw new Exception\PreconditionFailed('An If-None-Match header was specified, but the ETag matched (or * was specified).', 'If-None-Match');
                     }
                 }
             }
@@ -1412,7 +1433,7 @@ class Server implements LoggerAwareInterface, EmitterInterface
                 if ($lastMod) {
                     $lastMod = new \DateTime('@'.$lastMod);
                     if ($lastMod > $date) {
-                        throw new ExceptionNs\PreconditionFailed('An If-Unmodified-Since header was specified, but the entity has been changed since the specified date.', 'If-Unmodified-Since');
+                        throw new Exception\PreconditionFailed('An If-Unmodified-Since header was specified, but the entity has been changed since the specified date.', 'If-Unmodified-Since');
                     }
                 }
             }
@@ -1472,7 +1493,7 @@ class Server implements LoggerAwareInterface, EmitterInterface
 
             // If we ended here, it means there was no valid ETag + token
             // combination found for the current condition. This means we fail!
-            throw new ExceptionNs\PreconditionFailed('Failed to find a valid token/etag combination for '.$uri, 'If');
+            throw new Exception\PreconditionFailed('Failed to find a valid token/etag combination for '.$uri, 'If');
         }
 
         return true;
@@ -1627,6 +1648,8 @@ class Server implements LoggerAwareInterface, EmitterInterface
      */
     public function generateMultiStatus($fileProperties, $strip404s = false)
     {
+        $this->emit('beforeMultiStatus', [&$fileProperties]);
+
         $w = $this->xml->getWriter();
         if (self::$streamMultiStatus) {
             return function () use ($fileProperties, $strip404s, $w) {

@@ -1,11 +1,10 @@
 <?php
 
 
-
 namespace Sabre\CardDAV;
 
 use Sabre\DAV;
-use Sabre\DAV\ExceptionNs\ReportNotSupported;
+use Sabre\DAV\Exception\ReportNotSupported;
 use Sabre\DAV\Xml\Property\LocalHref;
 use Sabre\DAVACL;
 use Sabre\HTTP;
@@ -328,11 +327,11 @@ class Plugin extends DAV\ServerPlugin
                 $vobj = VObject\Reader::read($data);
             }
         } catch (VObject\ParseException $e) {
-            throw new DAV\ExceptionNs\UnsupportedMediaType('This resource only supports valid vCard or jCard data. Parse error: '.$e->getMessage());
+            throw new DAV\Exception\UnsupportedMediaType('This resource only supports valid vCard or jCard data. Parse error: '.$e->getMessage());
         }
 
         if ('VCARD' !== $vobj->name) {
-            throw new DAV\ExceptionNs\UnsupportedMediaType('This collection can only support vcard objects.');
+            throw new DAV\Exception\UnsupportedMediaType('This collection can only support vcard objects.');
         }
 
         $options = VObject\Node::PROFILE_CARDDAV;
@@ -366,7 +365,7 @@ class Plugin extends DAV\ServerPlugin
                     break;
                 case 3:
                     // Level 3 means a critical error
-                    throw new DAV\ExceptionNs\UnsupportedMediaType('Validation error in vCard: '.$message['message']);
+                    throw new DAV\Exception\UnsupportedMediaType('Validation error in vCard: '.$message['message']);
             }
         }
         if ($warningMessage) {
@@ -587,13 +586,20 @@ class Plugin extends DAV\ServerPlugin
                 foreach ($vProperties as $vProperty) {
                     // If we got all the way here, we'll need to validate the
                     // text-match filter.
-                    $success = DAV\StringUtil::textMatch($vProperty[$filter['name']]->getValue(), $filter['text-match']['value'], $filter['text-match']['collation'], $filter['text-match']['match-type']);
+                    if (isset($vProperty[$filter['name']])) {
+                        $success = DAV\StringUtil::textMatch(
+                            $vProperty[$filter['name']]->getValue(),
+                            $filter['text-match']['value'],
+                            $filter['text-match']['collation'],
+                            $filter['text-match']['match-type']
+                        );
+                        if ($filter['text-match']['negate-condition']) {
+                            $success = !$success;
+                        }
+                    }
                     if ($success) {
                         break;
                     }
-                }
-                if ($filter['text-match']['negate-condition']) {
-                    $success = !$success;
                 }
             } // else
 
@@ -628,14 +634,14 @@ class Plugin extends DAV\ServerPlugin
             $success = false;
             foreach ($texts as $haystack) {
                 $success = DAV\StringUtil::textMatch($haystack, $filter['value'], $filter['collation'], $filter['match-type']);
+                if ($filter['negate-condition']) {
+                    $success = !$success;
+                }
 
                 // Breaking on the first match
                 if ($success) {
                     break;
                 }
-            }
-            if ($filter['negate-condition']) {
-                $success = !$success;
             }
 
             if ($success && 'anyof' === $test) {
@@ -793,7 +799,7 @@ class Plugin extends DAV\ServerPlugin
      *
      * @return string
      */
-    protected function convertVCard($data, $target, array $propertiesFilter = null)
+    protected function convertVCard($data, $target, ?array $propertiesFilter = null)
     {
         if (is_resource($data)) {
             $data = stream_get_contents($data);

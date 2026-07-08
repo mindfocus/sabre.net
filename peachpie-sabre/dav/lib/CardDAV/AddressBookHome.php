@@ -1,7 +1,6 @@
 <?php
 
 
-
 namespace Sabre\CardDAV;
 
 use Sabre\DAV;
@@ -20,7 +19,14 @@ use Sabre\Uri;
  */
 class AddressBookHome extends DAV\Collection implements DAV\IExtendedCollection, DAVACL\IACL
 {
-    use DAVACL\ACLTrait;
+    use DAVACL\ACLTrait {
+        DAVACL\ACLTrait::getACL as traitGetACL;
+    }
+
+    public function getACL(): array
+    {
+        return $this->traitGetACL();
+    }
 
     /**
      * Principal uri.
@@ -66,7 +72,7 @@ class AddressBookHome extends DAV\Collection implements DAV\IExtendedCollection,
      */
     public function setName($name)
     {
-        throw new DAV\ExceptionNs\MethodNotAllowed();
+        throw new DAV\Exception\MethodNotAllowed();
     }
 
     /**
@@ -74,7 +80,7 @@ class AddressBookHome extends DAV\Collection implements DAV\IExtendedCollection,
      */
     public function delete()
     {
-        throw new DAV\ExceptionNs\MethodNotAllowed();
+        throw new DAV\Exception\MethodNotAllowed();
     }
 
     /**
@@ -92,12 +98,12 @@ class AddressBookHome extends DAV\Collection implements DAV\IExtendedCollection,
      *
      * This is currently not allowed
      *
-     * @param string   $filename
+     * @param string   $name
      * @param resource $data
      */
-    public function createFile($filename, $data = null)
+    public function createFile($name, $data = null)
     {
-        throw new DAV\ExceptionNs\MethodNotAllowed('Creating new files in this collection is not supported');
+        throw new DAV\Exception\MethodNotAllowed('Creating new files in this collection is not supported');
     }
 
     /**
@@ -109,7 +115,7 @@ class AddressBookHome extends DAV\Collection implements DAV\IExtendedCollection,
      */
     public function createDirectory($filename)
     {
-        throw new DAV\ExceptionNs\MethodNotAllowed('Creating new collections in this collection is not supported');
+        throw new DAV\Exception\MethodNotAllowed('Creating new collections in this collection is not supported');
     }
 
     /**
@@ -128,7 +134,7 @@ class AddressBookHome extends DAV\Collection implements DAV\IExtendedCollection,
                 return $child;
             }
         }
-        throw new DAV\ExceptionNs\NotFound('Addressbook with name \''.$name.'\' could not be found');
+        throw new DAV\Exception\NotFound('Addressbook with name \''.$name.'\' could not be found');
     }
 
     /**
@@ -157,7 +163,7 @@ class AddressBookHome extends DAV\Collection implements DAV\IExtendedCollection,
     public function createExtendedCollection($name, MkCol $mkCol)
     {
         if (!$mkCol->hasResourceType('{'.Plugin::NS_CARDDAV.'}addressbook')) {
-            throw new DAV\ExceptionNs\InvalidResourceType('Unknown resourceType for this collection');
+            throw new DAV\Exception\InvalidResourceType('Unknown resourceType for this collection');
         }
         $properties = $mkCol->getRemainingValues();
         $mkCol->setRemainingResultCode(201);

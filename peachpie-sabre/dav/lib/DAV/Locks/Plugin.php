@@ -1,7 +1,6 @@
 <?php
 
 
-
 namespace Sabre\DAV\Locks;
 
 use Sabre\DAV;
@@ -167,7 +166,7 @@ class Plugin extends DAV\ServerPlugin
             // Checking if there's already non-shared locks on the uri.
             foreach ($existingLocks as $existingLock) {
                 if (LockInfo::EXCLUSIVE === $existingLock->scope) {
-                    throw new DAV\ExceptionNs\ConflictingLock($existingLock);
+                    throw new DAV\Exception\ConflictingLock($existingLock);
                 }
             }
 
@@ -175,7 +174,7 @@ class Plugin extends DAV\ServerPlugin
             $lockInfo->depth = $this->server->getHTTPDepth();
             $lockInfo->uri = $uri;
             if ($existingLock && LockInfo::SHARED != $lockInfo->scope) {
-                throw new DAV\ExceptionNs\ConflictingLock($existingLock);
+                throw new DAV\Exception\ConflictingLock($existingLock);
             }
         } else {
             // Gonna check if this was a lock refresh.
@@ -197,9 +196,9 @@ class Plugin extends DAV\ServerPlugin
             // If none were found, this request is in error.
             if (is_null($found)) {
                 if ($existingLocks) {
-                    throw new DAV\ExceptionNs\Locked(reset($existingLocks));
+                    throw new DAV\Exception\Locked(reset($existingLocks));
                 } else {
-                    throw new DAV\ExceptionNs\BadRequest('An xml body is required for lock requests');
+                    throw new DAV\Exception\BadRequest('An xml body is required for lock requests');
                 }
             }
 
@@ -227,7 +226,7 @@ class Plugin extends DAV\ServerPlugin
             //
             // See Issue 222
             // $this->server->emit('beforeWriteContent',array($uri));
-        } catch (DAV\ExceptionNs\NotFound $e) {
+        } catch (DAV\Exception\NotFound $e) {
             // It didn't, lets create it
             $this->server->createFile($uri, fopen('php://memory', 'r'));
             $newFile = true;
@@ -257,7 +256,7 @@ class Plugin extends DAV\ServerPlugin
 
         // If the locktoken header is not supplied, we need to throw a bad request exception
         if (!$lockToken) {
-            throw new DAV\ExceptionNs\BadRequest('No lock token was supplied');
+            throw new DAV\Exception\BadRequest('No lock token was supplied');
         }
         $path = $request->getPath();
         $locks = $this->getLocks($path);
@@ -281,7 +280,7 @@ class Plugin extends DAV\ServerPlugin
         }
 
         // If we got here, it means the locktoken was invalid
-        throw new DAV\ExceptionNs\LockTokenMatchesRequestUri();
+        throw new DAV\Exception\LockTokenMatchesRequestUri();
     }
 
     /**
@@ -295,6 +294,10 @@ class Plugin extends DAV\ServerPlugin
     {
         $locks = $this->getLocks($path, $includeChildren = true);
         foreach ($locks as $lock) {
+            // don't delete a lock on a parent dir
+            if (0 !== strpos($lock->uri, $path)) {
+                continue;
+            }
             $this->unlockNode($path, $lock);
         }
     }
@@ -353,7 +356,7 @@ class Plugin extends DAV\ServerPlugin
             } elseif (0 === stripos($header, 'infinite')) {
                 $header = LockInfo::TIMEOUT_INFINITE;
             } else {
-                throw new DAV\ExceptionNs\BadRequest('Invalid HTTP timeout header');
+                throw new DAV\Exception\BadRequest('Invalid HTTP timeout header');
             }
         } else {
             $header = 0;
@@ -371,7 +374,7 @@ class Plugin extends DAV\ServerPlugin
     {
         return $this->server->xml->write('{DAV:}prop', [
             '{DAV:}lockdiscovery' => new DAV\Xml\Property\LockDiscovery([$lockInfo]),
-        ]);
+        ], $this->server->getBaseUri());
     }
 
     /**
@@ -497,7 +500,7 @@ class Plugin extends DAV\ServerPlugin
         // If there's any locks left in the 'mustLocks' array, it means that
         // the resource was locked and we must block it.
         if ($mustLocks) {
-            throw new DAV\ExceptionNs\Locked(reset($mustLocks));
+            throw new DAV\Exception\Locked(reset($mustLocks));
         }
     }
 

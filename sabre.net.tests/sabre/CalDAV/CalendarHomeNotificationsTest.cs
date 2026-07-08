@@ -1,4 +1,4 @@
-﻿using Moq;
+using Moq;
 using NUnit.Framework;
 using Pchp.Core;
 using Sabre.CalDAV;
@@ -28,7 +28,6 @@ namespace sabre.net.tests.sabre.CalDAV
             Assert.IsTrue(children.Array.Count == 0);
         }
         [Test]
-        [ExpectedException( typeof( Sabre.DAV.ExceptionNs.NotFound ) )]
         public void testGetChildNoSupport()
         {
         //    $this->expectException('Sabre\DAV\Exception\NotFound');
@@ -39,7 +38,8 @@ namespace sabre.net.tests.sabre.CalDAV
             PhpArray p = new PhpArray();
             p.Add("uri", "principals/user");
             var calendarHome = new CalendarHome(backend.Object, p);
-            calendarHome.getChild("notifications");
+            var notFoundType = typeof(Sabre.DAV.Server).Assembly.GetType("Sabre.DAV.Exception.NotFound", throwOnError: true);
+            Assert.Throws(notFoundType, () => calendarHome.getChild("notifications"));
         }
         [Test]
         public void testGetChildren()

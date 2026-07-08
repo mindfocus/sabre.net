@@ -1,7 +1,6 @@
 <?php
 
 
-
 namespace Sabre\Xml;
 
 /**
@@ -16,5 +15,5 @@ class Version
     /**
      * Full version number.
      */
-    const VERSION = '2.1.1';
+    public const VERSION = '2.2.11';
 }

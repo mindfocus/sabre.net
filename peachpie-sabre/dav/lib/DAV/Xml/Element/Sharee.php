@@ -1,10 +1,9 @@
 <?php
 
 
-
 namespace Sabre\DAV\Xml\Element;
 
-use Sabre\DAV\ExceptionNs\BadRequest;
+use Sabre\DAV\Exception\BadRequest;
 use Sabre\DAV\Sharing\Plugin;
 use Sabre\DAV\Xml\Property\Href;
 use Sabre\DAV\Xml\Property\ShareAccess;

@@ -1,7 +1,6 @@
 <?php
 
 
-
 namespace Sabre\DAV;
 
 use Sabre\Uri;
@@ -16,7 +15,7 @@ use Sabre\Uri;
  * @author Evert Pot (http://evertpot.com/)
  * @license http://sabre.io/license/ Modified BSD License
  */
-class Tree
+class Tree implements INodeByPath
 {
     /**
      * The root node.
@@ -62,20 +61,38 @@ class Tree
             return $this->rootNode;
         }
 
-        // Attempting to fetch its parent
-        list($parentName, $baseName) = Uri\split($path);
+        $node = $this->rootNode;
 
-        // If there was no parent, we must simply ask it from the root node.
-        if ('' === $parentName) {
-            $node = $this->rootNode->getChild($baseName);
-        } else {
-            // Otherwise, we recursively grab the parent and ask him/her.
-            $parent = $this->getNodeForPath($parentName);
+        // look for any cached parent and collect the parts below the parent
+        $parts = [];
+        $remainingPath = $path;
+        do {
+            list($remainingPath, $baseName) = Uri\split($remainingPath);
+            array_unshift($parts, $baseName);
 
-            if (!($parent instanceof ICollection)) {
-                throw new ExceptionNs\NotFound('Could not find node at path: '.$path);
+            if (isset($this->cache[$remainingPath])) {
+                $node = $this->cache[$remainingPath];
+                break;
             }
-            $node = $parent->getChild($baseName);
+        } while ('' !== $remainingPath);
+
+        while (count($parts)) {
+            if (!($node instanceof ICollection)) {
+                throw new Exception\NotFound('Could not find node at path: '.$path);
+            }
+
+            if ($node instanceof INodeByPath) {
+                $targetNode = $node->getNodeForPath(implode('/', $parts));
+                if ($targetNode instanceof INode) {
+                    $node = $targetNode;
+                    break;
+                }
+            }
+
+            $part = array_shift($parts);
+            if ('' !== $part) {
+                $node = $node->getChild($part);
+            }
         }
 
         $this->cache[$path] = $node;
@@ -109,7 +126,7 @@ class Tree
             }
 
             return $parentNode->childExists($base);
-        } catch (ExceptionNs\NotFound $e) {
+        } catch (Exception\NotFound $e) {
             return false;
         }
     }
@@ -141,8 +158,6 @@ class Tree
      *
      * @param string $sourcePath      The path to the file which should be moved
      * @param string $destinationPath The full destination path, so not just the destination parent node
-     *
-     * @return int
      */
     public function move($sourcePath, $destinationPath)
     {
@@ -228,7 +243,7 @@ class Tree
         // flushing the entire cache
         $path = trim($path, '/');
         foreach ($this->cache as $nodePath => $node) {
-            if ('' === $path || $nodePath == $path || 0 === strpos($nodePath, $path.'/')) {
+            if ('' === $path || $nodePath == $path || 0 === strpos((string) $nodePath, $path.'/')) {
                 unset($this->cache[$nodePath]);
             }
         }
@@ -293,6 +308,8 @@ class Tree
         if ('' === (string) $destinationName) {
             $destinationName = $source->getName();
         }
+
+        $destination = null;
 
         if ($source instanceof IFile) {
             $data = $source->get();

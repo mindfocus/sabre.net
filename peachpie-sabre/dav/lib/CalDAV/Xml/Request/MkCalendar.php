@@ -1,7 +1,6 @@
 <?php
 
 
-
 namespace Sabre\CalDAV\Xml\Request;
 
 use Sabre\Xml\Reader;

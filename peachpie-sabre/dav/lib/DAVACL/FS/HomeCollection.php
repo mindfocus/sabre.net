@@ -1,7 +1,6 @@
 <?php
 
 
-
 namespace Sabre\DAVACL\FS;
 
 use Sabre\DAVACL\AbstractPrincipalCollection;

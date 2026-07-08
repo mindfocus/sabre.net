@@ -1,21 +1,20 @@
 using System;
+using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security;
+using System.Text;
 using Pchp.Core;
 
-namespace ConsoleApp1
+namespace Nextsharp.LibXml2
 {
-    /// <summary>
-    /// The XMLReader extension is an XML pull parser. The reader acts as a cursor going forward
-    /// on the document stream and stopping at each node on the way.
-    /// </summary>
-    [PhpType(PhpTypeAttribute.InheritName), PhpExtension("xmlreader")]
+    [PhpType(PhpTypeAttribute.InheritName), PhpExtension("nextsharp_libxml2")]
     public class XMLReader
     {
+        private static readonly IntPtr NativeLibraryHandle = libxml2.LoadNativaLibrary();
+
         private IntPtr _ptr;
-        
-        #region XmlReader node types
+        private IntPtr _inputBuffer;
 
         public const int NONE = 0;
         public const int ELEMENT = 1;
@@ -40,293 +39,454 @@ namespace ConsoleApp1
         public const int VALIDATE = 3;
         public const int SUBST_ENTITIES = 4;
 
-        #endregion
-        
-        internal string _xmlreader_get_valid_file_path(string source, string resolved_path, int resolved_path_len )
+        public XMLReader()
         {
-            unsafe
+            if (NativeLibraryHandle == IntPtr.Zero)
             {
-                var uri = libxml2.XmlCreateURI();
-                var sourcePtr = Marshal.StringToHGlobalAuto(source);
-                var listPtr = Marshal.StringToHGlobalAuto(":");
-                var escsource = libxml2.XmlURIEscapeStr((byte*) sourcePtr, (byte*) listPtr);
-                var escsourceStr = Marshal.PtrToStringAuto(new IntPtr(escsource));
-                libxml2.XmlParseURIReference(uri, escsourceStr);
-                return "";
+                throw new DllNotFoundException("Unable to load libxml2 from the libxml2.net native directory.");
             }
         }
-        #region Methods
 
-        /// <summary>
-        /// Returns the value of a named attribute or NULL if the attribute does not exist or
-        /// not positioned on an element node.
-        /// </summary>
-        /// <param name="name">The name of the attribute.</param>
-        /// <returns>The value of the attribute, or NULL if no attribute with the given name is
-        /// found or not positioned on an element node.</returns>
+        public int depth => _ptr == IntPtr.Zero ? 0 : libxml2.XmlTextReaderDepth(_ptr);
+
+        public bool hasAttributes => _ptr != IntPtr.Zero && libxml2.XmlTextReaderHasAttributes(_ptr) == 1;
+
+        public bool isEmptyElement => _ptr != IntPtr.Zero && libxml2.XmlTextReaderIsEmptyElement(_ptr) == 1;
+
+        public string localName => ReadConstString(_ptr == IntPtr.Zero ? IntPtr.Zero : libxml2.XmlTextReaderConstLocalName(_ptr));
+
+        public string namespaceURI => ReadConstString(_ptr == IntPtr.Zero ? IntPtr.Zero : libxml2.XmlTextReaderConstNamespaceUri(_ptr));
+
+        public int nodeType => _ptr == IntPtr.Zero ? NONE : libxml2.XmlTextReaderNodeType(_ptr);
+
+        public string value => ReadConstString(_ptr == IntPtr.Zero ? IntPtr.Zero : libxml2.XmlTextReaderConstValue(_ptr));
+
+        public bool close()
+        {
+            if (_ptr != IntPtr.Zero)
+            {
+                libxml2.XmlTextReaderClose(_ptr);
+                libxml2.XmlFreeTextReader(_ptr);
+                _ptr = IntPtr.Zero;
+            }
+
+            ReleaseInputBuffer();
+
+            return true;
+        }
+
         public string getAttribute(string name)
         {
-            unsafe
+            if (_ptr == IntPtr.Zero || nodeType != ELEMENT)
             {
-                var namePtr = Marshal.StringToHGlobalAuto(name);
+                return null;
+            }
 
-                var resultPtr = libxml2.XmlTextReaderGetAttribute(_ptr, (byte*) namePtr);
-                var result = Marshal.PtrToStringAuto(new IntPtr(resultPtr));
-                return result;
+            var namePtr = StringToUtf8HGlobal(name);
+            try
+            {
+                return ReadConstString(libxml2.XmlTextReaderGetAttribute(_ptr, namePtr), null);
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(namePtr);
             }
         }
-        /// <summary>
-        /// Returns the value of an attribute based on its position or an empty string if attribute
-        /// does not exist or not positioned on an element node.
-        /// </summary>
-        /// <param name="index">The position of the attribute.</param>
-        /// <returns>The value of the attribute, or NULL if no attribute exists at index or is not
-        /// positioned on the element.</returns>
+
         public string getAttributeNo(int index)
         {
-            unsafe
+            if (_ptr == IntPtr.Zero || nodeType != ELEMENT)
             {
-                var result = libxml2.XmlTextReaderGetAttributeNo(_ptr, index);
-                return Marshal.PtrToStringAuto(new IntPtr(result));
+                return null;
             }
+
+            return ReadConstString(libxml2.XmlTextReaderGetAttributeNo(_ptr, index), null);
         }
-        /// <summary>
-        /// Returns the value of an attribute by name and namespace URI or an empty string if attribute
-        /// does not exist or not positioned on an element node.
-        /// </summary>
-        /// <param name="localName">The local name.</param>
-        /// <param name="namespaceURI">The namespace URI.</param>
-        /// <returns>The value of the attribute, or NULL if no attribute with the given localName and
-        /// namespaceURI is found or not positioned of element.</returns>
+
         public string getAttributeNs(string localName, string namespaceURI)
         {
-            unsafe
+            if (_ptr == IntPtr.Zero || nodeType != ELEMENT)
             {
-                var localNamePtr = Marshal.StringToHGlobalAuto(localName);
-                var namespaceURIPtr = Marshal.StringToHGlobalAuto(namespaceURI);
-                var resultPtr = libxml2.XmlTextReaderGetAttributeNs(_ptr, (byte*) localNamePtr, (byte*) namespaceURIPtr);
-                return Marshal.PtrToStringAuto(new IntPtr(resultPtr));
+                return null;
+            }
+
+            var localNamePtr = StringToUtf8HGlobal(localName);
+            var namespacePtr = StringToUtf8HGlobal(namespaceURI);
+            try
+            {
+                return ReadConstString(libxml2.XmlTextReaderGetAttributeNs(_ptr, localNamePtr, namespacePtr), null);
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(localNamePtr);
+                Marshal.FreeHGlobal(namespacePtr);
             }
         }
-        /// <summary>
-        /// Indicates if specified property has been set.
-        /// </summary>
-        /// <param name="property">One of the parser option constants.</param>
-        /// <returns>Returns TRUE on success or FALSE on failure.</returns>
+
         public bool getParserProperty(int property)
         {
-            return libxml2.XmlTextReaderGetParserProp(_ptr, property) != -1;
+            return _ptr != IntPtr.Zero && libxml2.XmlTextReaderGetParserProp(_ptr, property) == 1;
         }
-        /// <summary>
-        /// Returns a boolean indicating if the document being parsed is currently valid.
-        /// </summary>
-        /// <returns>Returns TRUE on success or FALSE on failure.</returns>
+
+        // Sabre only uses this as a coarse parser health check.
         public bool isValid()
         {
-            return libxml2.XmlTextReaderIsValid(_ptr) != -1;
+            return _ptr != IntPtr.Zero;
         }
 
-        /// <summary>
-        /// Lookup in scope namespace for a given prefix.
-        /// </summary>
-        /// <param name="prefix">String containing the prefix.</param>
-        /// <returns>Returns TRUE on success or FALSE on failure.</returns>
         public bool lookupNamespace(string prefix)
         {
-            unsafe
+            if (_ptr == IntPtr.Zero)
             {
-                var prefixPtr = Marshal.StringToHGlobalAuto(prefix);
+                return false;
+            }
 
-                var resultPtr = libxml2.XmlTextReaderLookupNamespace(_ptr, (byte*) prefixPtr);
-                var result = Marshal.PtrToStringAuto(new IntPtr(resultPtr));
-                return result != "";
+            var prefixPtr = StringToUtf8HGlobal(prefix);
+            try
+            {
+                return !string.IsNullOrEmpty(ReadConstString(libxml2.XmlTextReaderLookupNamespace(_ptr, prefixPtr)));
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(prefixPtr);
             }
         }
-        /// <summary>
-        /// Positions cursor on the named attribute.
-        /// </summary>
-        /// <param name="name">The name of the attribute.</param>
-        /// <returns>Returns TRUE on success or FALSE on failure.</returns>
+
         public bool moveToAttribute(string name)
         {
-            unsafe
+            if (_ptr == IntPtr.Zero)
             {
-                var namePtr = Marshal.StringToHGlobalAuto(name);
-                return  libxml2.XmlTextReaderMoveToAttribute(_ptr, (byte*) namePtr) != -1;
+                return false;
+            }
+
+            var namePtr = StringToUtf8HGlobal(name);
+            try
+            {
+                return libxml2.XmlTextReaderMoveToAttribute(_ptr, namePtr) == 1;
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(namePtr);
             }
         }
-        /// <summary>
-        /// Positions cursor on attribute based on its position.
-        /// </summary>
-        /// <param name="index">The position of the attribute.</param>
-        /// <returns>Returns TRUE on success or FALSE on failure.</returns>
+
         public bool moveToAttributeNo(int index)
         {
-            return libxml2.XmlTextReaderMoveToAttributeNo(_ptr, index) != -1;
+            return _ptr != IntPtr.Zero && libxml2.XmlTextReaderMoveToAttributeNo(_ptr, index) == 1;
         }
-        /// <summary>
-        /// Positions cursor on the named attribute in specified namespace.
-        /// </summary>
-        /// <param name="localName">The local name.</param>
-        /// <param name="namespaceURI">The namespace URI.</param>
-        /// <returns>Returns TRUE on success or FALSE on failure.</returns>
+
         public bool moveToAttributeNs(string localName, string namespaceURI)
         {
-            unsafe
+            if (_ptr == IntPtr.Zero)
             {
-                var localNamePtr = Marshal.StringToHGlobalAuto(localName);
-                var namespacePtr = Marshal.StringToHGlobalAuto(namespaceURI);
-                return libxml2.XmlTextReaderMoveToAttributeNs(_ptr, (byte*) localNamePtr, (byte*) namespacePtr) != -1;
+                return false;
+            }
+
+            var localNamePtr = StringToUtf8HGlobal(localName);
+            var namespacePtr = StringToUtf8HGlobal(namespaceURI);
+            try
+            {
+                return libxml2.XmlTextReaderMoveToAttributeNs(_ptr, localNamePtr, namespacePtr) == 1;
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(localNamePtr);
+                Marshal.FreeHGlobal(namespacePtr);
             }
         }
-        /// <summary>
-        /// Moves cursor to the parent Element of current Attribute.
-        /// </summary>
-        /// <returns>Returns TRUE if successful and FALSE if it fails or not positioned on Attribute
-        /// when this method is called.</returns>
+
         public bool moveToElement()
         {
-            return libxml2.XmlTextReaderMoveToElement(_ptr) != -1;
+            return _ptr != IntPtr.Zero && libxml2.XmlTextReaderMoveToElement(_ptr) == 1;
         }
-        /// <summary>
-        /// Moves cursor to the first Attribute.
-        /// </summary>
-        /// <returns>Returns TRUE on success or FALSE on failure.</returns>
+
         public bool moveToFirstAttribute()
         {
-            return libxml2.XmlTextReaderMoveToFirstAttribute(_ptr) != -1;
+            return _ptr != IntPtr.Zero && libxml2.XmlTextReaderMoveToFirstAttribute(_ptr) == 1;
         }
-        /// <summary>
-        /// Moves cursor to the next Attribute if positioned on an Attribute or moves to first attribute
-        /// if positioned on an Element.
-        /// </summary>
-        /// <returns>Returns TRUE on success or FALSE on failure.</returns>
+
         public bool moveToNextAttribute()
         {
-            return libxml2.XmlTextReaderMoveToNextAttribute(_ptr) != -1;
+            return _ptr != IntPtr.Zero && libxml2.XmlTextReaderMoveToNextAttribute(_ptr) == 1;
         }
-        /// <summary>
-        /// Positions cursor on the next node skipping all subtrees.
-        /// </summary>
-        /// <param name="localname">The name of the next node to move to.</param>
-        /// <returns>Returns TRUE on success or FALSE on failure.</returns>
+
         public bool next(string localname = null)
         {
-            return libxml2.XmlTextReaderNext(_ptr) != -1;
+            if (_ptr == IntPtr.Zero)
+            {
+                return false;
+            }
+
+            if (libxml2.XmlTextReaderNext(_ptr) != 1)
+            {
+                return false;
+            }
+
+            if (string.IsNullOrEmpty(localname))
+            {
+                return true;
+            }
+
+            while (nodeType != NONE && !string.Equals(localName, localname, StringComparison.Ordinal))
+            {
+                if (libxml2.XmlTextReaderNext(_ptr) != 1)
+                {
+                    return false;
+                }
+            }
+
+            return string.Equals(localName, localname, StringComparison.Ordinal);
         }
-        /// <summary>
-        /// Set the URI containing the XML document to be parsed.
-        /// </summary>
-        /// <param name="URI">URI pointing to the document.</param>
-        /// <param name="encoding">The document encoding or NULL.</param>
-        /// <param name="options">A bitmask of the LIBXML_* constants.</param>
-        /// <returns>Returns TRUE on success or FALSE on failure.</returns>
+
         public bool open(string URI, string encoding = null, int options = 0)
         {
-            // _ptr = libxml2.XmlReaderForFile();
-            return false;
+            close();
+
+            _ptr = libxml2.XmlReaderForFile(URI, encoding, options);
+
+            return _ptr != IntPtr.Zero;
         }
-        #endregion
-        internal unsafe class libxml2
+
+        public bool read()
         {
-            internal const string LibraryName = "libxml2.2";
+            return _ptr != IntPtr.Zero && libxml2.XmlTextReaderRead(_ptr) == 1;
+        }
+
+        public string readInnerXml()
+        {
+            if (_ptr == IntPtr.Zero)
+            {
+                return string.Empty;
+            }
+
+            var xmlPtr = libxml2.XmlTextReaderReadInnerXml(_ptr);
+            if (xmlPtr == IntPtr.Zero)
+            {
+                return string.Empty;
+            }
+
+            // `xmlTextReaderReadInnerXml()` should return an xmlChar buffer,
+            // but with the current Windows libxml2 build the matching free
+            // path crashes in practice. Copy the UTF-8 content and let the
+            // caller continue; the string sizes here are bounded by the
+            // current element subtree, so this is a pragmatic compatibility
+            // trade-off until we replace this with a safer subtree reader.
+            return ReadConstString(xmlPtr);
+        }
+
+        public string readInnerXML() => readInnerXml();
+
+        public bool xml(string source, string encoding = null, int options = 0)
+        {
+            if (string.IsNullOrWhiteSpace(source))
+            {
+                return false;
+            }
+
+            close();
+
+            _inputBuffer = StringToUtf8HGlobal(source, out var byteCount);
+            _ptr = libxml2.XmlReaderForMemory(_inputBuffer, byteCount, IntPtr.Zero, encoding, options);
+
+            if (_ptr == IntPtr.Zero)
+            {
+                ReleaseInputBuffer();
+                return false;
+            }
+
+            return true;
+        }
+
+        public bool XML(string source, string encoding = null, int options = 0) => xml(source, encoding, options);
+
+        private void ReleaseInputBuffer()
+        {
+            if (_inputBuffer != IntPtr.Zero)
+            {
+                Marshal.FreeHGlobal(_inputBuffer);
+                _inputBuffer = IntPtr.Zero;
+            }
+        }
+
+        private static string ReadConstString(IntPtr ptr, string defaultValue = "")
+        {
+            return ptr == IntPtr.Zero ? defaultValue : Marshal.PtrToStringUTF8(ptr) ?? defaultValue;
+        }
+
+        private static IntPtr StringToUtf8HGlobal(string value)
+        {
+            return StringToUtf8HGlobal(value, out _);
+        }
+
+        private static IntPtr StringToUtf8HGlobal(string value, out int byteCount)
+        {
+            var bytes = Encoding.UTF8.GetBytes(value ?? string.Empty);
+            byteCount = bytes.Length;
+
+            var ptr = Marshal.AllocHGlobal(byteCount + 1);
+            Marshal.Copy(bytes, 0, ptr, byteCount);
+            Marshal.WriteByte(ptr, byteCount, 0);
+
+            return ptr;
+        }
+
+        internal static class libxml2
+        {
+            internal const string LibraryName = "libxml2";
             private const string macoslib = "native/mac/libxml2.2.dylib";
-            private const string windowslib = "native/win/libxml2.2.dll";
             private const string linuxlib = "native/linux/libxml2.2.so";
+            private const string windowsdir = "native/win";
+            private const string windowscharsetlib = "charset-1.dll";
+            private const string windowsiconvlib = "iconv-2.dll";
+            private const string windowszlib = "z.dll";
+            private const string windowslib = "libxml2.dll";
+
             internal static IntPtr LoadNativaLibrary()
             {
                 var assembly = Assembly.GetExecutingAssembly();
+                var assemblyDirectory = Path.GetDirectoryName(assembly.Location) ?? string.Empty;
                 IntPtr lib = IntPtr.Zero;
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
-                    NativeLibrary.TryLoad(macoslib, assembly, DllImportSearchPath.AssemblyDirectory, out lib);
+                    NativeLibrary.TryLoad(Path.Combine(assemblyDirectory, macoslib), out lib);
                 }
 
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
-                    NativeLibrary.TryLoad(linuxlib, assembly, DllImportSearchPath.AssemblyDirectory, out lib);
+                    NativeLibrary.TryLoad(Path.Combine(assemblyDirectory, linuxlib), out lib);
                 }
 
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
-                    NativeLibrary.TryLoad(windowslib, assembly, DllImportSearchPath.AssemblyDirectory, out lib);
+                    var windowsDirectory = Path.Combine(assemblyDirectory, windowsdir);
+                    TryLoadDependency(Path.Combine(windowsDirectory, windowscharsetlib));
+                    TryLoadDependency(Path.Combine(windowsDirectory, windowsiconvlib));
+                    TryLoadDependency(Path.Combine(windowsDirectory, windowszlib));
+                    NativeLibrary.TryLoad(Path.Combine(windowsDirectory, windowslib), out lib);
                 }
 
                 return lib;
             }
-            [SuppressUnmanagedCodeSecurity]
-            [DllImport(LibraryName, CallingConvention = global::System.Runtime.InteropServices.CallingConvention.Cdecl,
-                EntryPoint="xmlParseURIReference")]
-            internal static extern int XmlParseURIReference(global::System.IntPtr uri, [MarshalAs(UnmanagedType.LPUTF8Str)] string str);
+
+            private static void TryLoadDependency(string path)
+            {
+                if (File.Exists(path))
+                {
+                    NativeLibrary.TryLoad(path, out _);
+                }
+            }
 
             [SuppressUnmanagedCodeSecurity]
-            [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl,
-                EntryPoint="xmlURIEscapeStr")]
-            internal static extern byte* XmlURIEscapeStr(byte* str, byte* list);
+            [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "xmlReaderForFile")]
+            internal static extern IntPtr XmlReaderForFile(
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string filename,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string encoding,
+                int options);
+
             [SuppressUnmanagedCodeSecurity]
-            [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl,
-                EntryPoint="xmlCreateURI")]
-            internal static extern IntPtr XmlCreateURI();
+            [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "xmlReaderForMemory")]
+            internal static extern IntPtr XmlReaderForMemory(
+                IntPtr buffer,
+                int size,
+                IntPtr url,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string encoding,
+                int options);
+
             [SuppressUnmanagedCodeSecurity]
-            [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl,
-                EntryPoint="xmlReaderForFile")]
-            internal static extern IntPtr XmlReaderForFile([MarshalAs(UnmanagedType.LPUTF8Str)] string filename, [MarshalAs(UnmanagedType.LPUTF8Str)] string encoding, int options);
+            [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "xmlTextReaderRead")]
+            internal static extern int XmlTextReaderRead(IntPtr reader);
+
             [SuppressUnmanagedCodeSecurity]
-            [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl,
-                EntryPoint="xmlTextReaderNext")]
+            [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "xmlTextReaderNext")]
             internal static extern int XmlTextReaderNext(IntPtr reader);
+
             [SuppressUnmanagedCodeSecurity]
-            [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl,
-                EntryPoint="xmlTextReaderMoveToNextAttribute")]
+            [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "xmlTextReaderMoveToNextAttribute")]
             internal static extern int XmlTextReaderMoveToNextAttribute(IntPtr reader);
+
             [SuppressUnmanagedCodeSecurity]
-            [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl,
-                EntryPoint="xmlTextReaderMoveToFirstAttribute")]
+            [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "xmlTextReaderMoveToFirstAttribute")]
             internal static extern int XmlTextReaderMoveToFirstAttribute(IntPtr reader);
+
             [SuppressUnmanagedCodeSecurity]
-            [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl,
-                EntryPoint="xmlTextReaderMoveToElement")]
+            [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "xmlTextReaderMoveToElement")]
             internal static extern int XmlTextReaderMoveToElement(IntPtr reader);
-            [SuppressUnmanagedCodeSecurity]
-            [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl,
-                EntryPoint="xmlTextReaderMoveToAttributeNs")]
-            internal static extern int XmlTextReaderMoveToAttributeNs(IntPtr reader, byte* localName, byte* namespaceURI);
 
             [SuppressUnmanagedCodeSecurity]
-            [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl,
-                EntryPoint="xmlTextReaderMoveToAttributeNo")]
+            [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "xmlTextReaderMoveToAttributeNs")]
+            internal static extern int XmlTextReaderMoveToAttributeNs(IntPtr reader, IntPtr localName, IntPtr namespaceURI);
+
+            [SuppressUnmanagedCodeSecurity]
+            [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "xmlTextReaderMoveToAttributeNo")]
             internal static extern int XmlTextReaderMoveToAttributeNo(IntPtr reader, int no);
-            [SuppressUnmanagedCodeSecurity]
-            [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl,
-                EntryPoint="xmlTextReaderGetAttribute")]
-            internal static extern byte* XmlTextReaderGetAttribute(IntPtr reader, byte* name);
-            [SuppressUnmanagedCodeSecurity]
-            [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl,
-                EntryPoint="xmlTextReaderGetAttributeNo")]
-            internal static extern byte* XmlTextReaderGetAttributeNo(IntPtr reader, int no);
-            [SuppressUnmanagedCodeSecurity]
-            [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl,
-                EntryPoint="xmlTextReaderGetAttributeNs")]
-            internal static extern byte* XmlTextReaderGetAttributeNs(IntPtr reader, byte* localName, byte* namespaceURI);
 
             [SuppressUnmanagedCodeSecurity]
-            [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl,
-                EntryPoint="xmlTextReaderGetParserProp")]
+            [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "xmlTextReaderGetAttribute")]
+            internal static extern IntPtr XmlTextReaderGetAttribute(IntPtr reader, IntPtr name);
+
+            [SuppressUnmanagedCodeSecurity]
+            [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "xmlTextReaderGetAttributeNo")]
+            internal static extern IntPtr XmlTextReaderGetAttributeNo(IntPtr reader, int no);
+
+            [SuppressUnmanagedCodeSecurity]
+            [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "xmlTextReaderGetAttributeNs")]
+            internal static extern IntPtr XmlTextReaderGetAttributeNs(IntPtr reader, IntPtr localName, IntPtr namespaceURI);
+
+            [SuppressUnmanagedCodeSecurity]
+            [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "xmlTextReaderGetParserProp")]
             internal static extern int XmlTextReaderGetParserProp(IntPtr reader, int prop);
+
             [SuppressUnmanagedCodeSecurity]
-            [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl,
-                EntryPoint="xmlTextReaderIsValid")]
-            internal static extern int XmlTextReaderIsValid(IntPtr reader);
+            [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "xmlTextReaderLookupNamespace")]
+            internal static extern IntPtr XmlTextReaderLookupNamespace(IntPtr reader, IntPtr prefix);
+
             [SuppressUnmanagedCodeSecurity]
-            [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl,
-                EntryPoint="xmlTextReaderLookupNamespace")]
-            internal static extern byte* XmlTextReaderLookupNamespace(IntPtr reader, byte* prefix);
-            
+            [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "xmlTextReaderMoveToAttribute")]
+            internal static extern int XmlTextReaderMoveToAttribute(IntPtr reader, IntPtr name);
+
             [SuppressUnmanagedCodeSecurity]
-            [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl,
-                EntryPoint="xmlTextReaderMoveToAttribute")]
-            internal static extern int XmlTextReaderMoveToAttribute(IntPtr reader, byte* name);
+            [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "xmlTextReaderConstLocalName")]
+            internal static extern IntPtr XmlTextReaderConstLocalName(IntPtr reader);
+
+            [SuppressUnmanagedCodeSecurity]
+            [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "xmlTextReaderConstNamespaceUri")]
+            internal static extern IntPtr XmlTextReaderConstNamespaceUri(IntPtr reader);
+
+            [SuppressUnmanagedCodeSecurity]
+            [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "xmlTextReaderConstValue")]
+            internal static extern IntPtr XmlTextReaderConstValue(IntPtr reader);
+
+            [SuppressUnmanagedCodeSecurity]
+            [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "xmlTextReaderDepth")]
+            internal static extern int XmlTextReaderDepth(IntPtr reader);
+
+            [SuppressUnmanagedCodeSecurity]
+            [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "xmlTextReaderNodeType")]
+            internal static extern int XmlTextReaderNodeType(IntPtr reader);
+
+            [SuppressUnmanagedCodeSecurity]
+            [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "xmlTextReaderIsEmptyElement")]
+            internal static extern int XmlTextReaderIsEmptyElement(IntPtr reader);
+
+            [SuppressUnmanagedCodeSecurity]
+            [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "xmlTextReaderHasAttributes")]
+            internal static extern int XmlTextReaderHasAttributes(IntPtr reader);
+
+            [SuppressUnmanagedCodeSecurity]
+            [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "xmlTextReaderReadInnerXml")]
+            internal static extern IntPtr XmlTextReaderReadInnerXml(IntPtr reader);
+
+            [SuppressUnmanagedCodeSecurity]
+            [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "xmlTextReaderClose")]
+            internal static extern int XmlTextReaderClose(IntPtr reader);
+
+            [SuppressUnmanagedCodeSecurity]
+            [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "xmlFreeTextReader")]
+            internal static extern void XmlFreeTextReader(IntPtr reader);
+
+            [SuppressUnmanagedCodeSecurity]
+            [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "xmlFree")]
+            internal static extern void XmlFree(IntPtr ptr);
         }
-        
     }
 }

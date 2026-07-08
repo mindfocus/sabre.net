@@ -1,7 +1,6 @@
 <?php
 
 
-
 namespace Sabre\DAVACL\Xml\Property;
 
 use Sabre\DAV\Browser\HtmlOutput;

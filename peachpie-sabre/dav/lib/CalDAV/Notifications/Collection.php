@@ -1,7 +1,6 @@
 <?php
 
 
-
 namespace Sabre\CalDAV\Notifications;
 
 use Sabre\CalDAV;

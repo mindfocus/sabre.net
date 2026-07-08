@@ -1,13 +1,12 @@
 <?php
 
 
-
 namespace Sabre\CalDAV\Xml\Request;
 
 use Sabre\CalDAV\Plugin;
 use Sabre\CalDAV\SharingPlugin;
 use Sabre\DAV;
-use Sabre\DAV\ExceptionNs\BadRequest;
+use Sabre\DAV\Exception\BadRequest;
 use Sabre\Xml\Element\KeyValue;
 use Sabre\Xml\Reader;
 use Sabre\Xml\XmlDeserializable;

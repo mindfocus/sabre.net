@@ -1,30 +1,36 @@
-<Project Sdk="Peachpie.NET.Sdk/0.9.981">
+<Project Sdk="Peachpie.NET.Sdk/1.1.13">
   <PropertyGroup>
-    <Description>sabre.io project for .net core</Description>
+    <OutputType>Library</OutputType>
+    <Description>Nextsharp Sabre.NET PoC aligned with the project's current Sabre sources.</Description>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.4</Version>
-    <Authors>mindfocus</Authors>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Version>1.0.4-nextsharp-poc</Version>
+    <Authors>mindfocus,nextsharp</Authors>
+    <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
+
   <ItemGroup>
-    <Compile Include="**/*.php" />
-    <Compile Remove="sabre.net.end\**" />
+    <Compile Include="dav/**/*.php" />
+    <Compile Include="event/**/*.php" />
+    <Compile Include="http/**/*.php" />
+    <Compile Include="uri/**/*.php" />
+    <Compile Include="vobject/**/*.php" />
+    <Compile Include="xml/**/*.php" />
   </ItemGroup>
+
   <ItemGroup>
-    <None Remove="uri\lib\UriFunctions.php" />
-    <None Remove="sabre.net.end\**" />
+    <ProjectReference Include="..\..\..\nc\vendor_psr.msbuildproj" />
+    <ProjectReference Include="..\libxml2.net\libxml2.net.csproj" />
+    <ProjectReference Include="..\sabre.net.runtimepatch\sabre.net.runtimepatch.csproj" />
   </ItemGroup>
+
   <ItemGroup>
-    <DotNetCliToolReference Include="Peachpie.Compiler.Tools" Version="0.9.0-*" />
+    <None Include="..\libxml2.net\native\win\*.dll" Link="native\win\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
+
   <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0">
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Remove="sabre.net.end\**" />
   </ItemGroup>
 </Project>

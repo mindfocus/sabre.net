@@ -1,7 +1,6 @@
 <?php
 
 
-
 namespace Sabre\DAVACL;
 
 use Sabre\DAV;
@@ -90,7 +89,7 @@ abstract class AbstractPrincipalCollection extends DAV\Collection implements IPr
     public function getChildren()
     {
         if ($this->disableListing) {
-            throw new DAV\ExceptionNs\MethodNotAllowed('Listing members of this collection is disabled');
+            throw new DAV\Exception\MethodNotAllowed('Listing members of this collection is disabled');
         }
         $children = [];
         foreach ($this->principalBackend->getPrincipalsByPrefix($this->principalPrefix) as $principalInfo) {
@@ -113,7 +112,7 @@ abstract class AbstractPrincipalCollection extends DAV\Collection implements IPr
     {
         $principalInfo = $this->principalBackend->getPrincipalByPath($this->principalPrefix.'/'.$name);
         if (!$principalInfo) {
-            throw new DAV\ExceptionNs\NotFound('Principal with name '.$name.' not found');
+            throw new DAV\Exception\NotFound('Principal with name '.$name.' not found');
         }
 
         return $this->getChildForPrincipal($principalInfo);

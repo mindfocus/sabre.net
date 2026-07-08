@@ -3,8 +3,8 @@
 namespace Sabre\VObject\Parser;
 
 use Sabre\VObject\Component;
-use Sabre\VObject\ComponentNs\VCalendar;
-use Sabre\VObject\ComponentNs\VCard;
+use Sabre\VObject\Component\VCalendar;
+use Sabre\VObject\Component\VCard;
 use Sabre\VObject\Document;
 use Sabre\VObject\EofException;
 use Sabre\VObject\Node;
@@ -83,6 +83,12 @@ class MimeDir extends Parser
             $this->setInput($input);
         }
 
+        if (!\is_resource($this->input)) {
+            // Null was passed as input, but there was no existing input buffer
+            // There is nothing to parse.
+            throw new ParseException('No input provided to parse');
+        }
+
         if (0 !== $options) {
             $this->options = $options;
         }
@@ -124,7 +130,7 @@ class MimeDir extends Parser
         $this->startLine = 0;
 
         if (is_string($input)) {
-            // Convering to a stream.
+            // Converting to a stream.
             $stream = fopen('php://temp', 'r+');
             fwrite($stream, $input);
             rewind($stream);
@@ -167,7 +173,11 @@ class MimeDir extends Parser
 
         while (true) {
             // Reading until we hit END:
-            $line = $this->readLine();
+            try {
+                $line = $this->readLine();
+            } catch (EofException $oEx) {
+                $line = 'END:'.$this->root->name;
+            }
             if ('END:' === strtoupper(substr($line, 0, 4))) {
                 break;
             }
@@ -343,7 +353,7 @@ class MimeDir extends Parser
             ) (?=[;:,])
             /xi";
 
-        //echo $regex, "\n"; die();
+        //echo $regex, "\n"; exit();
         preg_match_all($regex, $line, $matches, PREG_SET_ORDER);
 
         $property = [
@@ -362,7 +372,7 @@ class MimeDir extends Parser
          * in the result.
          */
         foreach ($matches as $match) {
-            if (isset($match['paramValue'])) {
+            if (!empty($match[0]) && ('=' === $match[0][0] || ',' === $match[0][0])) {
                 if ($match['paramValue'] && '"' === $match['paramValue'][0]) {
                     $value = substr($match['paramValue'], 1, -1);
                 } else {
@@ -372,12 +382,22 @@ class MimeDir extends Parser
                 $value = $this->unescapeParam($value);
 
                 if (is_null($lastParam)) {
+                    if ($this->options & self::OPTION_IGNORE_INVALID_LINES) {
+                        // When the property can't be matched and the configuration
+                        // option is set to ignore invalid lines, we ignore this line
+                        // This can happen when servers provide faulty data as iCloud
+                        //  frequently does with X-APPLE-STRUCTURED-LOCATION
+                        continue;
+                    }
                     throw new ParseException('Invalid Mimedir file. Line starting at '.$this->startLine.' did not follow iCalendar/vCard conventions');
                 }
                 if (is_null($property['parameters'][$lastParam])) {
                     $property['parameters'][$lastParam] = $value;
                 } elseif (is_array($property['parameters'][$lastParam])) {
                     $property['parameters'][$lastParam][] = $value;
+                } elseif ($property['parameters'][$lastParam] === $value) {
+                    // When the current value of the parameter is the same as the
+                    // new one, then we can leave the current parameter as it is.
                 } else {
                     $property['parameters'][$lastParam] = [
                         $property['parameters'][$lastParam],
@@ -386,14 +406,14 @@ class MimeDir extends Parser
                 }
                 continue;
             }
-            if (isset($match['paramName'])) {
+            if (!empty($match[0]) && ';' === $match[0][0]) {
                 $lastParam = strtoupper($match['paramName']);
                 if (!isset($property['parameters'][$lastParam])) {
                     $property['parameters'][$lastParam] = null;
                 }
                 continue;
             }
-            if (isset($match['propValue'])) {
+            if (!empty($match['propValue'])) {
                 $property['value'] = $match['propValue'];
                 continue;
             }
@@ -433,13 +453,13 @@ class MimeDir extends Parser
             }
         }
 
-        $propObj = $this->root->createProperty($property['name'], null, $namedParameters);
+        $propObj = $this->root->createProperty($property['name'], null, $namedParameters, null, $this->startLine, $line);
 
         foreach ($namelessParameters as $namelessParameter) {
             $propObj->add(null, $namelessParameter);
         }
 
-        if ('QUOTED-PRINTABLE' === strtoupper($propObj['ENCODING'])) {
+        if (isset($propObj['ENCODING']) && 'QUOTED-PRINTABLE' === strtoupper($propObj['ENCODING'])) {
             $propObj->setQuotedPrintableValue($this->extractQuotedPrintableValue());
         } else {
             $charset = $this->charset;
@@ -450,10 +470,8 @@ class MimeDir extends Parser
             switch (strtolower($charset)) {
                 case 'utf-8':
                     break;
-                case 'iso-8859-1':
-                    $property['value'] = utf8_encode($property['value']);
-                    break;
                 case 'windows-1252':
+                case 'iso-8859-1':
                     $property['value'] = mb_convert_encoding($property['value'], 'UTF-8', $charset);
                     break;
                 default:
@@ -480,7 +498,7 @@ class MimeDir extends Parser
      * vCard 3.0 says:
      *   * (rfc2425) Backslashes, newlines (\n or \N) and comma's must be
      *     escaped, all time time.
-     *   * Comma's are used for delimeters in multiple values
+     *   * Comma's are used for delimiters in multiple values
      *   * (rfc2426) Adds to to this that the semi-colon MUST also be escaped,
      *     as in some properties semi-colon is used for separators.
      *   * Properties using semi-colons: N, ADR, GEO, ORG
@@ -518,7 +536,7 @@ class MimeDir extends Parser
      *
      * Now for the parameters
      *
-     * If delimiter is not set (null) this method will just return a string.
+     * If delimiter is not set (empty string) this method will just return a string.
      * If it's a comma or a semi-colon the string will be split on those
      * characters, and always return an array.
      *

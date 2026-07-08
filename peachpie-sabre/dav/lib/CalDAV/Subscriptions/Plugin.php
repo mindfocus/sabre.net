@@ -1,7 +1,6 @@
 <?php
 
 
-
 namespace Sabre\CalDAV\Subscriptions;
 
 use Sabre\DAV\INode;

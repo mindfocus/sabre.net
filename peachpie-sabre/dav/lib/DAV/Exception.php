@@ -1,7 +1,6 @@
 <?php
 
 
-
 namespace Sabre\DAV;
 
 /**
@@ -32,7 +31,7 @@ class Exception extends \Exception
     /**
      * This method allows the exception to include additional information into the WebDAV error response.
      */
-    public function serialize(Server $server, \DOMElement $errorNode)
+    public function serialize(Server $server, \Sabre\Xml\Writer $writer)
     {
     }
 

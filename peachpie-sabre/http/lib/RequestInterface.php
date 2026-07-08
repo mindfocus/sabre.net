@@ -1,7 +1,6 @@
 <?php
 
 
-
 namespace Sabre\HTTP;
 
 /**
@@ -67,7 +66,7 @@ interface RequestInterface extends MessageInterface
      * If the full path is equal to the base url, this method will return an
      * empty string.
      *
-     * This method will also urldecode the path, and if the url was incoded as
+     * This method will also urldecode the path, and if the url was encoded as
      * ISO-8859-1, it will convert it to UTF-8.
      *
      * If the path is outside of the base url, a LogicException will be thrown.

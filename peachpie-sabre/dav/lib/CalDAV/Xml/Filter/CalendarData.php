@@ -1,11 +1,10 @@
 <?php
 
 
-
 namespace Sabre\CalDAV\Xml\Filter;
 
 use Sabre\CalDAV\Plugin;
-use Sabre\DAV\ExceptionNs\BadRequest;
+use Sabre\DAV\Exception\BadRequest;
 use Sabre\VObject\DateTimeParser;
 use Sabre\Xml\Reader;
 use Sabre\Xml\XmlDeserializable;
@@ -60,7 +59,6 @@ class CalendarData implements XmlDeserializable
         foreach ($elems as $elem) {
             switch ($elem['name']) {
                 case '{'.Plugin::NS_CALDAV.'}expand':
-
                     $result['expand'] = [
                         'start' => isset($elem['attributes']['start']) ? DateTimeParser::parseDateTime($elem['attributes']['start']) : null,
                         'end' => isset($elem['attributes']['end']) ? DateTimeParser::parseDateTime($elem['attributes']['end']) : null,

@@ -1,7 +1,6 @@
 <?php
 
 
-
 namespace Sabre\CalDAV\Xml\Request;
 
 use Sabre\CalDAV\Plugin;
@@ -48,7 +47,7 @@ class CalendarMultiGetReport implements XmlDeserializable
     public $expand = null;
 
     /**
-     * The mimetype of the content that should be returend. Usually
+     * The mimetype of the content that should be returned. Usually
      * text/calendar.
      *
      * @var string

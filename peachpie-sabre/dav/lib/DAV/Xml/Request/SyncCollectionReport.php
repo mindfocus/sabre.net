@@ -1,10 +1,9 @@
 <?php
 
 
-
 namespace Sabre\DAV\Xml\Request;
 
-use Sabre\DAV\ExceptionNs\BadRequest;
+use Sabre\DAV\Exception\BadRequest;
 use Sabre\Xml\Element\KeyValue;
 use Sabre\Xml\Reader;
 use Sabre\Xml\XmlDeserializable;

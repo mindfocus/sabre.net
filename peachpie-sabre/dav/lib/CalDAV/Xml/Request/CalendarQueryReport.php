@@ -1,11 +1,10 @@
 <?php
 
 
-
 namespace Sabre\CalDAV\Xml\Request;
 
 use Sabre\CalDAV\Plugin;
-use Sabre\DAV\ExceptionNs\BadRequest;
+use Sabre\DAV\Exception\BadRequest;
 use Sabre\Xml\Reader;
 use Sabre\Xml\XmlDeserializable;
 
@@ -48,7 +47,7 @@ class CalendarQueryReport implements XmlDeserializable
     public $expand = null;
 
     /**
-     * The mimetype of the content that should be returend. Usually
+     * The mimetype of the content that should be returned. Usually
      * text/calendar.
      *
      * @var string

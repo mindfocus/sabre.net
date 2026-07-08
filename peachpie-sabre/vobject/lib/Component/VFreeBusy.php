@@ -1,6 +1,6 @@
 <?php
 
-namespace Sabre\VObject\ComponentNs;
+namespace Sabre\VObject\Component;
 
 use DateTimeInterface;
 use Sabre\VObject;
@@ -20,9 +20,6 @@ class VFreeBusy extends VObject\Component
     /**
      * Checks based on the contained FREEBUSY information, if a timeslot is
      * available.
-     *
-     * @param DateTimeInterface $start
-     * @param DateTimeInterface $end
      *
      * @return bool
      */

@@ -1,11 +1,10 @@
 <?php
 
 
-
 namespace Sabre\CardDAV\Xml\Filter;
 
 use Sabre\CardDAV\Plugin;
-use Sabre\DAV\ExceptionNs\BadRequest;
+use Sabre\DAV\Exception\BadRequest;
 use Sabre\Xml\Reader;
 use Sabre\Xml\XmlDeserializable;
 

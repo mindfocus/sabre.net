@@ -1,11 +1,11 @@
 <?php
 
 
-
 namespace Sabre\CardDAV\Backend;
 
 use Sabre\CardDAV;
 use Sabre\DAV;
+use Sabre\DAV\PropPatch;
 
 /**
  * PDO CardDAV backend.
@@ -93,7 +93,7 @@ class PDO extends AbstractBackend implements SyncSupport
      *
      * @param string $addressBookId
      */
-    public function updateAddressBook($addressBookId, \Sabre\DAV\PropPatch $propPatch)
+    public function updateAddressBook($addressBookId, PropPatch $propPatch)
     {
         $supportedProperties = [
             '{DAV:}displayname',
@@ -161,7 +161,7 @@ class PDO extends AbstractBackend implements SyncSupport
                     $values['description'] = $newValue;
                     break;
                 default:
-                    throw new DAV\ExceptionNs\BadRequest('Unknown property: '.$property);
+                    throw new DAV\Exception\BadRequest('Unknown property: '.$property);
             }
         }
 
@@ -204,7 +204,7 @@ class PDO extends AbstractBackend implements SyncSupport
      *   * size - The size of the card in bytes.
      *
      * If these last two properties are provided, less time will be spent
-     * calculating them. If they are specified, you can also ommit carddata.
+     * calculating them. If they are specified, you can also omit carddata.
      * This may speed up certain requests, especially with large cards.
      *
      * @param mixed $addressbookId
@@ -451,7 +451,7 @@ class PDO extends AbstractBackend implements SyncSupport
      * @param int    $syncLevel
      * @param int    $limit
      *
-     * @return array
+     * @return array|null
      */
     public function getChangesForAddressBook($addressBookId, $syncToken, $syncLevel, $limit = null)
     {

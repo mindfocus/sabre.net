@@ -1,10 +1,9 @@
 <?php
 
 
-
 namespace Sabre\Xml;
 
-use XMLWriter;
+use Nextsharp\LibXml2\XMLWriter as BaseXmlWriter;
 
 /**
  * The XML Writer class.
@@ -30,7 +29,7 @@ use XMLWriter;
  * @author Evert Pot (http://evertpot.com/)
  * @license http://sabre.io/license/ Modified BSD License
  */
-class Writer extends XMLWriter
+class Writer extends BaseXmlWriter
 {
     use ContextStackTrait;
 
@@ -93,8 +92,6 @@ class Writer extends XMLWriter
      *      ]
      *    ]
      * ]
-     *
-     * @param mixed $value
      */
     public function write($value)
     {
@@ -122,15 +119,19 @@ class Writer extends XMLWriter
      */
     public function startElement($name): bool
     {
+        $declaredNamespace = null;
+        $declaredPrefix = null;
         if ('{' === $name[0]) {
             list($namespace, $localName) =
                 Service::parseClarkNotation($name);
 
             if (array_key_exists($namespace, $this->namespaceMap)) {
+                $declaredNamespace = $namespace;
+                $declaredPrefix = '' === $this->namespaceMap[$namespace] ? null : $this->namespaceMap[$namespace];
                 $result = $this->startElementNS(
-                    '' === $this->namespaceMap[$namespace] ? null : $this->namespaceMap[$namespace],
+                    $declaredPrefix,
                     $localName,
-                    null
+                    $this->namespacesWritten ? null : $namespace
                 );
             } else {
                 // An empty namespace means it's the global namespace. This is
@@ -151,7 +152,10 @@ class Writer extends XMLWriter
 
         if (!$this->namespacesWritten) {
             foreach ($this->namespaceMap as $namespace => $prefix) {
-                $this->writeAttribute(($prefix ? 'xmlns:'.$prefix : 'xmlns'), $namespace);
+                if ($namespace === $declaredNamespace && $prefix === $declaredPrefix) {
+                    continue;
+                }
+                $this->writeAttribute($prefix ? 'xmlns:'.$prefix : 'xmlns', $namespace);
             }
             $this->namespacesWritten = true;
         }
@@ -182,8 +186,6 @@ class Writer extends XMLWriter
      * XMLWriter::startElement doesn't either.
      *
      * @param array|string|object|null $content
-     *
-     * @return bool
      */
     public function writeElement($name, $content = null): bool
     {

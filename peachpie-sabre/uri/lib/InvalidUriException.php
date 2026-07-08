@@ -1,5 +1,6 @@
 <?php
 
+
 namespace Sabre\Uri;
 
 /**

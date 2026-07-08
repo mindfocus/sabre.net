@@ -1,10 +1,9 @@
 <?php
 
 
-
 namespace Sabre\Xml;
 
-use XMLReader;
+use Nextsharp\LibXml2\XMLReader as BaseXmlReader;
 
 /**
  * The Reader class expands upon PHP's built-in XMLReader.
@@ -19,7 +18,7 @@ use XMLReader;
  * @author Evert Pot (http://evertpot.com/)
  * @license http://sabre.io/license/ Modified BSD License
  */
-class Reader extends XMLReader
+class Reader extends BaseXmlReader
 {
     use ContextStackTrait;
 
@@ -55,7 +54,11 @@ class Reader extends XMLReader
      */
     public function parse(): array
     {
-        $previousEntityState = libxml_disable_entity_loader(true);
+        $previousEntityState = null;
+        $shouldCallLibxmlDisableEntityLoader = (\LIBXML_VERSION < 20900);
+        if ($shouldCallLibxmlDisableEntityLoader) {
+            $previousEntityState = libxml_disable_entity_loader(true);
+        }
         $previousSetting = libxml_use_internal_errors(true);
 
         try {
@@ -78,7 +81,9 @@ class Reader extends XMLReader
             }
         } finally {
             libxml_use_internal_errors($previousSetting);
-            libxml_disable_entity_loader($previousEntityState);
+            if ($shouldCallLibxmlDisableEntityLoader) {
+                libxml_disable_entity_loader($previousEntityState);
+            }
         }
 
         return $result;
@@ -86,18 +91,18 @@ class Reader extends XMLReader
 
     /**
      * parseGetElements parses everything in the current sub-tree,
-     * and returns a an array of elements.
+     * and returns an array of elements.
      *
      * Each element has a 'name', 'value' and 'attributes' key.
      *
-     * If the the element didn't contain sub-elements, an empty array is always
+     * If the element didn't contain sub-elements, an empty array is always
      * returned. If there was any text inside the element, it will be
      * discarded.
      *
      * If the $elementMap argument is specified, the existing elementMap will
      * be overridden while parsing the tree, and restored after this process.
      */
-    public function parseGetElements(array $elementMap = null): array
+    public function parseGetElements(?array $elementMap = null): array
     {
         $result = $this->parseInnerTree($elementMap);
         if (!is_array($result)) {
@@ -120,7 +125,7 @@ class Reader extends XMLReader
      *
      * @return array|string|null
      */
-    public function parseInnerTree(array $elementMap = null)
+    public function parseInnerTree(?array $elementMap = null)
     {
         $text = null;
         $elements = [];
@@ -147,7 +152,9 @@ class Reader extends XMLReader
                 throw new ParseException('This should never happen (famous last words)');
             }
 
-            while (true) {
+            $keepOnParsing = true;
+
+            while ($keepOnParsing) {
                 if (!$this->isValid()) {
                     $errors = libxml_get_errors();
 
@@ -169,7 +176,8 @@ class Reader extends XMLReader
                     case self::END_ELEMENT:
                         // Ensuring we are moving the cursor after the end element.
                         $this->read();
-                        break 2;
+                        $keepOnParsing = false;
+                        break;
                     case self::NONE:
                         throw new ParseException('We hit the end of the document prematurely. This likely means that some parser "eats" too many elements. Do not attempt to continue parsing.');
                     default:
@@ -196,7 +204,7 @@ class Reader extends XMLReader
         $previousDepth = $this->depth;
 
         while ($this->read() && $this->depth != $previousDepth) {
-            if (in_array($this->nodeType, [XMLReader::TEXT, XMLReader::CDATA, XMLReader::WHITESPACE])) {
+            if (in_array($this->nodeType, [\XMLReader::TEXT, \XMLReader::CDATA, \XMLReader::WHITESPACE])) {
                 $result .= $this->value;
             }
         }
@@ -240,7 +248,7 @@ class Reader extends XMLReader
      *
      * If the attributes are part of the same namespace, they will simply be
      * short keys. If they are defined on a different namespace, the attribute
-     * name will be retured in clark-notation.
+     * name will be returned in clark-notation.
      */
     public function parseAttributes(): array
     {
@@ -266,7 +274,7 @@ class Reader extends XMLReader
 
     /**
      * Returns the function that should be used to parse the element identified
-     * by it's clark-notation name.
+     * by its clark-notation name.
      */
     public function getDeserializerForElementName(string $name): callable
     {

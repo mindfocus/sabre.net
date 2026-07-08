@@ -19,8 +19,6 @@ class Writer
     /**
      * Serializes a vCard or iCalendar object.
      *
-     * @param Component $component
-     *
      * @return string
      */
     public static function write(Component $component)
@@ -31,8 +29,7 @@ class Writer
     /**
      * Serializes a jCal or jCard object.
      *
-     * @param Component $component
-     * @param int       $options
+     * @param int $options
      *
      * @return string
      */
@@ -44,8 +41,6 @@ class Writer
     /**
      * Serializes a xCal or xCard object.
      *
-     * @param Component $component
-     *
      * @return string
      */
     public static function writeXml(Component $component)
@@ -56,7 +51,7 @@ class Writer
 
         $writer->startDocument('1.0', 'utf-8');
 
-        if ($component instanceof ComponentNs\VCalendar) {
+        if ($component instanceof Component\VCalendar) {
             $writer->startElement('icalendar');
             $writer->writeAttribute('xmlns', Parser\XML::XCAL_NAMESPACE);
         } else {

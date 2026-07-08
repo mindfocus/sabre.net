@@ -1,7 +1,6 @@
 <?php
 
 
-
 namespace Sabre\DAV\Sync;
 
 use Sabre\DAV;
@@ -102,18 +101,18 @@ class Plugin extends DAV\ServerPlugin
         // Getting the data
         $node = $this->server->tree->getNodeForPath($uri);
         if (!$node instanceof ISyncCollection) {
-            throw new DAV\ExceptionNs\ReportNotSupported('The {DAV:}sync-collection REPORT is not supported on this url.');
+            throw new DAV\Exception\ReportNotSupported('The {DAV:}sync-collection REPORT is not supported on this url.');
         }
         $token = $node->getSyncToken();
         if (!$token) {
-            throw new DAV\ExceptionNs\ReportNotSupported('No sync information is available at this node');
+            throw new DAV\Exception\ReportNotSupported('No sync information is available at this node');
         }
 
         $syncToken = $report->syncToken;
         if (!is_null($syncToken)) {
             // Sync-token must start with our prefix
             if (self::SYNCTOKEN_PREFIX !== substr($syncToken, 0, strlen(self::SYNCTOKEN_PREFIX))) {
-                throw new DAV\ExceptionNs\InvalidSyncToken('Invalid or unknown sync token');
+                throw new DAV\Exception\InvalidSyncToken('Invalid or unknown sync token');
             }
 
             $syncToken = substr($syncToken, strlen(self::SYNCTOKEN_PREFIX));
@@ -121,7 +120,11 @@ class Plugin extends DAV\ServerPlugin
         $changeInfo = $node->getChanges($syncToken, $report->syncLevel, $report->limit);
 
         if (is_null($changeInfo)) {
-            throw new DAV\ExceptionNs\InvalidSyncToken('Invalid or unknown sync token');
+            throw new DAV\Exception\InvalidSyncToken('Invalid or unknown sync token');
+        }
+
+        if (!array_key_exists('result_truncated', $changeInfo)) {
+            $changeInfo['result_truncated'] = false;
         }
 
         // Encoding the response
@@ -131,7 +134,8 @@ class Plugin extends DAV\ServerPlugin
             $changeInfo['added'],
             $changeInfo['modified'],
             $changeInfo['deleted'],
-            $report->properties
+            $report->properties,
+            $changeInfo['result_truncated']
         );
     }
 
@@ -141,7 +145,7 @@ class Plugin extends DAV\ServerPlugin
      * @param string $syncToken
      * @param string $collectionUrl
      */
-    protected function sendSyncCollectionResponse($syncToken, $collectionUrl, array $added, array $modified, array $deleted, array $properties)
+    protected function sendSyncCollectionResponse($syncToken, $collectionUrl, array $added, array $modified, array $deleted, array $properties, bool $resultTruncated = false)
     {
         $fullPaths = [];
 
@@ -164,6 +168,10 @@ class Plugin extends DAV\ServerPlugin
             $fullPath = $collectionUrl.'/'.$item;
             $responses[] = new DAV\Xml\Element\Response($fullPath, [], 404);
         }
+        if ($resultTruncated) {
+            $responses[] = new DAV\Xml\Element\Response($collectionUrl.'/', [], 507);
+        }
+
         $multiStatus = new DAV\Xml\Response\MultiStatus($responses, self::SYNCTOKEN_PREFIX.$syncToken);
 
         $this->server->httpResponse->setStatus(207);

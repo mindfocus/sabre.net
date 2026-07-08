@@ -1,6 +1,6 @@
 <?php
 
-namespace Sabre\VObject\ComponentNs;
+namespace Sabre\VObject\Component;
 
 use DateTimeInterface;
 use Sabre\VObject;
@@ -25,9 +25,6 @@ class VAvailability extends VObject\Component
      * time-range is based on:
      *
      * https://tools.ietf.org/html/draft-daboo-calendar-availability-05#section-3.1
-     *
-     * @param DateTimeInterface $start
-     * @param DateTimeInterface $end
      *
      * @return bool
      */

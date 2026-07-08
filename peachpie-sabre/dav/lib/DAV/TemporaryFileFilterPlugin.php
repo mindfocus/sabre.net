@@ -1,7 +1,6 @@
 <?php
 
 
-
 namespace Sabre\DAV;
 
 use Sabre\HTTP\RequestInterface;
@@ -217,7 +216,7 @@ class TemporaryFileFilterPlugin extends ServerPlugin
         $newFile = !file_exists($tempLocation);
 
         if (!$newFile && ($this->server->httpRequest->getHeader('If-None-Match'))) {
-            throw new ExceptionNs\PreconditionFailed('The resource already exists, and an If-None-Match header was supplied');
+            throw new Exception\PreconditionFailed('The resource already exists, and an If-None-Match header was supplied');
         }
 
         file_put_contents($tempLocation, $this->server->httpRequest->getBody());

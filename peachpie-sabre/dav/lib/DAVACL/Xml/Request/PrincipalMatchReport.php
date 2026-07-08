@@ -1,7 +1,6 @@
 <?php
 
 
-
 namespace Sabre\DAVACL\Xml\Request;
 
 use Sabre\Xml\Deserializer;

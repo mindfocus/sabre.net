@@ -1,7 +1,6 @@
 <?php
 
 
-
 namespace Sabre\DAV\Sharing;
 
 use Sabre\DAV\INode;

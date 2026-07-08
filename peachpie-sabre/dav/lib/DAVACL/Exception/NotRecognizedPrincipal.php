@@ -1,8 +1,7 @@
 <?php
 
 
-
-namespace Sabre\DAVACL\ExceptionNs;
+namespace Sabre\DAVACL\Exception;
 
 use Sabre\DAV;
 
@@ -14,18 +13,15 @@ use Sabre\DAV;
  * @author Evert Pot (http://evertpot.com/)
  * @license http://sabre.io/license/ Modified BSD License
  */
-class NotRecognizedPrincipal extends DAV\ExceptionNs\PreconditionFailed
+class NotRecognizedPrincipal extends DAV\Exception\PreconditionFailed
 {
     /**
      * Adds in extra information in the xml response.
      *
      * This method adds the {DAV:}recognized-principal element as defined in rfc3744
      */
-    public function serialize(DAV\Server $server, \DOMElement $errorNode)
+    public function serialize(DAV\Server $server, \Sabre\Xml\Writer $writer)
     {
-        $doc = $errorNode->ownerDocument;
-
-        $np = $doc->createElementNS('DAV:', 'd:recognized-principal');
-        $errorNode->appendChild($np);
+        $writer->writeElement('{DAV:}recognized-principal');
     }
 }

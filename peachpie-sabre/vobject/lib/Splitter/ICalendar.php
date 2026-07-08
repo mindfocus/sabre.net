@@ -3,7 +3,7 @@
 namespace Sabre\VObject\Splitter;
 
 use Sabre\VObject;
-use Sabre\VObject\ComponentNs\VCalendar;
+use Sabre\VObject\Component\VCalendar;
 
 /**
  * Splitter.
@@ -47,7 +47,7 @@ class ICalendar implements SplitterInterface
     {
         $data = VObject\Reader::read($input, $options);
 
-        if (!$data instanceof VObject\ComponentNs\VCalendar) {
+        if (!$data instanceof VObject\Component\VCalendar) {
             throw new VObject\ParseException('Supplied input could not be parsed as VCALENDAR.');
         }
 

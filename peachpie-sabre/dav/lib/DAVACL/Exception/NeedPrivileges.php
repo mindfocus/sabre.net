@@ -1,8 +1,7 @@
 <?php
 
 
-
-namespace Sabre\DAVACL\ExceptionNs;
+namespace Sabre\DAVACL\Exception;
 
 use Sabre\DAV;
 
@@ -16,7 +15,7 @@ use Sabre\DAV;
  * @author Evert Pot (http://evertpot.com/)
  * @license http://sabre.io/license/ Modified BSD License
  */
-class NeedPrivileges extends DAV\ExceptionNs\Forbidden
+class NeedPrivileges extends DAV\Exception\Forbidden
 {
     /**
      * The relevant uri.
@@ -50,24 +49,20 @@ class NeedPrivileges extends DAV\ExceptionNs\Forbidden
      *
      * This method adds the {DAV:}need-privileges element as defined in rfc3744
      */
-    public function serialize(DAV\Server $server, \DOMElement $errorNode)
+    public function serialize(DAV\Server $server, \Sabre\Xml\Writer $writer)
     {
-        $doc = $errorNode->ownerDocument;
-
-        $np = $doc->createElementNS('DAV:', 'd:need-privileges');
-        $errorNode->appendChild($np);
+        $writer->startElement('{DAV:}need-privileges');
 
         foreach ($this->privileges as $privilege) {
-            $resource = $doc->createElementNS('DAV:', 'd:resource');
-            $np->appendChild($resource);
-
-            $resource->appendChild($doc->createElementNS('DAV:', 'd:href', $server->getBaseUri().$this->uri));
-
-            $priv = $doc->createElementNS('DAV:', 'd:privilege');
-            $resource->appendChild($priv);
-
             preg_match('/^{([^}]*)}(.*)$/', $privilege, $privilegeParts);
-            $priv->appendChild($doc->createElementNS($privilegeParts[1], 'd:'.$privilegeParts[2]));
+            $writer->writeElement('{DAV:}resource', [
+                '{DAV:}href' => $server->getBaseUri().$this->uri,
+                '{DAV:}privilege' => [
+                    '{'.$privilegeParts[1].'}'.$privilegeParts[2] => null,
+                ],
+            ]);
         }
+
+        $writer->endElement();
     }
 }

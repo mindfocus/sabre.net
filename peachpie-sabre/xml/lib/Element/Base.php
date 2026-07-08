@@ -1,7 +1,6 @@
 <?php
 
 
-
 namespace Sabre\Xml\Element;
 
 use Sabre\Xml;
@@ -21,8 +20,6 @@ class Base implements Xml\Element
 {
     /**
      * PHP value to serialize.
-     *
-     * @var mixed
      */
     protected $value;
 
@@ -35,7 +32,7 @@ class Base implements Xml\Element
     }
 
     /**
-     * The xmlSerialize metod is called during xml writing.
+     * The xmlSerialize method is called during xml writing.
      *
      * Use the $writer argument to write its own xml serialization.
      *
@@ -58,7 +55,7 @@ class Base implements Xml\Element
     /**
      * The deserialize method is called during xml parsing.
      *
-     * This method is called statictly, this is because in theory this method
+     * This method is called statically, this is because in theory this method
      * may be used as a type of constructor, or factory method.
      *
      * Often you want to return an instance of the current class, but you are
@@ -72,8 +69,6 @@ class Base implements Xml\Element
      *
      * $reader->parseInnerTree() will parse the entire sub-tree, and advance to
      * the next element.
-     *
-     * @return mixed
      */
     public static function xmlDeserialize(Xml\Reader $reader)
     {

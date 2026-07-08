@@ -1,7 +1,6 @@
 <?php
 
 
-
 namespace Sabre\CardDAV\Backend;
 
 /**
@@ -88,7 +87,7 @@ interface BackendInterface
      *   * size - The size of the card in bytes.
      *
      * If these last two properties are provided, less time will be spent
-     * calculating them. If they are specified, you can also ommit carddata.
+     * calculating them. If they are specified, you can also omit carddata.
      * This may speed up certain requests, especially with large cards.
      *
      * @param mixed $addressbookId
@@ -98,7 +97,7 @@ interface BackendInterface
     public function getCards($addressbookId);
 
     /**
-     * Returns a specfic card.
+     * Returns a specific card.
      *
      * The same set of properties must be returned as with getCards. The only
      * exception is that 'carddata' is absolutely required.

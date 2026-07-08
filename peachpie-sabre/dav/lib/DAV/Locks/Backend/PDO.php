@@ -1,7 +1,6 @@
 <?php
 
 
-
 namespace Sabre\DAV\Locks\Backend;
 
 use Sabre\DAV\Locks\LockInfo;

@@ -1,5 +1,6 @@
-﻿using NUnit.Framework;
+using NUnit.Framework;
 using Pchp.Core;
+using Pchp.Core.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,11 +11,17 @@ namespace sabre.net.tests.sabre.Uri
 {
     class ResolveTest
     {
-        protected Sabre.Uri.UriFunctions func;
+        private static string ResolveUri(string baseUri, string update)
+        {
+            var uriFunctions = typeof(Sabre.Uri.Version).Assembly.GetType("<Root>uri/lib.functions_php", throwOnError: true);
+            return uriFunctions.GetMethod("Sabre.Uri.resolve")
+                .Invoke(null, new object[] { ContextExtensions.CurrentContext, new PhpString(baseUri), new PhpString(update) })
+                .ToString();
+        }
+
         [SetUp]
         public void Setup()
         {
-            func = new Sabre.Uri.UriFunctions();
         }
         /**
      * @dataProvider resolveData
@@ -28,7 +35,7 @@ namespace sabre.net.tests.sabre.Uri
         [Test, TestCaseSource("resolveData")]
     public void testResolve(string @base, string update, string expected)
     {
-            Assert.AreEqual(expected, func.resolve(@base, update));
+            Assert.AreEqual(expected, ResolveUri(@base, update));
         }
            /**
      * @return array<int, array<int, string>>

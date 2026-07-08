@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>Nextsharp.Sabre.RuntimePatch</RootNamespace>
+  </PropertyGroup>
+
+  <!--
+    调试插桩开关：默认仅 Debug 构建启用。
+    启用后，DateTimeModifyPatch 会向本地 debug server 同步上报事件，用于定位补丁装配链路；
+    关闭后（Release 默认），所有 ReportDebug 调用与 HttpClient 基础设施不参与编译，
+    避免 modify 热路径上每次都触发同步 HTTP（曾导致 RRULE 迭代用例耗时数十秒）。
+    需要临时启用时：dotnet build -p:DefineConstants=DEBUG_PATCH
+  -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <DefineConstants>$(DefineConstants);DEBUG_PATCH</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Lib.Harmony" Version="2.*" />
+    <PackageReference Include="Peachpie.Library" Version="1.1.13" />
+    <PackageReference Include="Peachpie.Runtime" Version="1.1.13" />
+  </ItemGroup>
+</Project>

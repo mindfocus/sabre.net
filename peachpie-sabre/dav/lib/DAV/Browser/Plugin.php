@@ -1,7 +1,6 @@
 <?php
 
 
-
 namespace Sabre\DAV\Browser;
 
 use Sabre\DAV;
@@ -85,8 +84,6 @@ class Plugin extends DAV\ServerPlugin
     /**
      * This method intercepts GET requests that have ?sabreAction=info
      * appended to the URL.
-     *
-     * @return bool
      */
     public function httpGetEarly(RequestInterface $request, ResponseInterface $response)
     {
@@ -122,7 +119,7 @@ class Plugin extends DAV\ServerPlugin
             case 'info':
                 try {
                     $this->server->tree->getNodeForPath($request->getPath());
-                } catch (DAV\ExceptionNs\NotFound $e) {
+                } catch (DAV\Exception\NotFound $e) {
                     // We're simply stopping when the file isn't found to not interfere
                     // with other plugins.
                     return;
@@ -157,6 +154,9 @@ class Plugin extends DAV\ServerPlugin
     public function httpPOST(RequestInterface $request, ResponseInterface $response)
     {
         $contentType = $request->getHeader('Content-Type');
+        if (!\is_string($contentType)) {
+            return;
+        }
         list($contentType) = explode(';', $contentType);
         if ('application/x-www-form-urlencoded' !== $contentType &&
             'multipart/form-data' !== $contentType) {
@@ -209,7 +209,6 @@ class Plugin extends DAV\ServerPlugin
 
                 // @codeCoverageIgnoreStart
                 case 'put':
-
                     if ($_FILES) {
                         $file = current($_FILES);
                     } else {
@@ -522,7 +521,7 @@ HTML;
 
     /**
      * This method takes a path/name of an asset and turns it into url
-     * suiteable for http access.
+     * suitable for http access.
      *
      * @param string $assetName
      *
@@ -550,13 +549,13 @@ HTML;
         // Making sure people aren't trying to escape from the base path.
         $path = str_replace('\\', '/', $path);
         if (false !== strpos($path, '/../') || '/..' === strrchr($path, '/')) {
-            throw new DAV\ExceptionNs\NotFound('Path does not exist, or escaping from the base path was detected');
+            throw new DAV\Exception\NotFound('Path does not exist, or escaping from the base path was detected');
         }
         $realPath = realpath($path);
         if ($realPath && 0 === strpos($realPath, realpath($assetDir)) && file_exists($path)) {
             return $path;
         }
-        throw new DAV\ExceptionNs\NotFound('Path does not exist, or escaping from the base path was detected');
+        throw new DAV\Exception\NotFound('Path does not exist, or escaping from the base path was detected');
     }
 
     /**

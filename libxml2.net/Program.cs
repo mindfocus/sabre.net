@@ -1,10 +1,9 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Security;
-using Peachpie.Library.XmlDom;
 
-namespace ConsoleApp1
+namespace Nextsharp.LibXml2
 {
     class Program
     {

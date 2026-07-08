@@ -1,7 +1,6 @@
 <?php
 
 
-
 namespace Sabre\Event;
 
 /**
@@ -16,5 +15,5 @@ class Version
     /**
      * Full version number.
      */
-    const VERSION = '5.1.0';
+    public const VERSION = '5.1.7';
 }

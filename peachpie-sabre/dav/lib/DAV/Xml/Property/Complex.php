@@ -1,7 +1,6 @@
 <?php
 
 
-
 namespace Sabre\DAV\Xml\Property;
 
 use Sabre\Xml\Element\XmlFragment;

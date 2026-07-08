@@ -1,13 +1,12 @@
 <?php
 
 
-
 namespace Sabre\CalDAV;
 
 use DateTime;
 use DateTimeZone;
 use Sabre\DAV;
-use Sabre\DAV\ExceptionNs\BadRequest;
+use Sabre\DAV\Exception\BadRequest;
 use Sabre\HTTP\RequestInterface;
 use Sabre\HTTP\ResponseInterface;
 use Sabre\VObject;
@@ -285,7 +284,7 @@ class ICSExportPlugin extends DAV\ServerPlugin
      */
     public function mergeObjects(array $properties, array $inputObjects)
     {
-        $calendar = new VObject\ComponentNs\VCalendar();
+        $calendar = new VObject\Component\VCalendar();
         $calendar->VERSION = '2.0';
         if (DAV\Server::$exposeVersion) {
             $calendar->PRODID = '-//SabreDAV//SabreDAV '.DAV\Version::VERSION.'//EN';

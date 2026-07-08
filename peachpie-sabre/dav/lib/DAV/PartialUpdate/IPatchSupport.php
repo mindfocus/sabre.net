@@ -1,7 +1,6 @@
 <?php
 
 
-
 namespace Sabre\DAV\PartialUpdate;
 
 use Sabre\DAV;

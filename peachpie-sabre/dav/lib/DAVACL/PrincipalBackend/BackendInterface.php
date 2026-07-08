@@ -1,7 +1,6 @@
 <?php
 
 
-
 namespace Sabre\DAVACL\PrincipalBackend;
 
 /**
@@ -48,7 +47,7 @@ interface BackendInterface
     public function getPrincipalByPath($path);
 
     /**
-     * Updates one ore more webdav properties on a principal.
+     * Updates one or more webdav properties on a principal.
      *
      * The list of mutations is stored in a Sabre\DAV\PropPatch object.
      * To do the actual updates, you must tell this object which properties
@@ -110,7 +109,7 @@ interface BackendInterface
      * @param string $uri
      * @param string $principalPrefix
      *
-     * @return string
+     * @return string|null
      */
     public function findByUri($uri, $principalPrefix);
 

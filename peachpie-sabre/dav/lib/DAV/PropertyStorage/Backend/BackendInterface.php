@@ -1,7 +1,6 @@
 <?php
 
 
-
 namespace Sabre\DAV\PropertyStorage\Backend;
 
 use Sabre\DAV\PropFind;

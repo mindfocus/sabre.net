@@ -1,14 +1,12 @@
 <?php
 
 
-
 namespace Sabre\Xml;
 
 use LibXMLError;
-use Throwable;
 
 /**
- * This exception is thrown when the Readers runs into a parsing error.
+ * This exception is thrown when the Reader runs into a parsing error.
  *
  * This exception effectively wraps 1 or more LibXMLError objects.
  *
@@ -30,11 +28,9 @@ class LibXMLException extends ParseException
      *
      * You should pass a list of LibXMLError objects in its constructor.
      *
-     * @param LibXMLError[] $errors
-     * @param int           $code
-     * @param Throwable     $previousException
+     * @param \LibXMLError[] $errors
      */
-    public function __construct(array $errors, int $code = 0, Throwable $previousException = null)
+    public function __construct(array $errors, int $code = 0, ?\Throwable $previousException = null)
     {
         $this->errors = $errors;
         parent::__construct($errors[0]->message.' on line '.$errors[0]->line.', column '.$errors[0]->column, $code, $previousException);

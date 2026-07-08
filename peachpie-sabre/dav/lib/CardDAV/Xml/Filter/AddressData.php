@@ -1,7 +1,6 @@
 <?php
 
 
-
 namespace Sabre\CardDAV\Xml\Filter;
 
 use Sabre\Xml\Reader;

@@ -1,11 +1,10 @@
 <?php
 
 
-
 namespace Sabre\CardDAV\Xml\Request;
 
 use Sabre\CardDAV\Plugin;
-use Sabre\DAV\ExceptionNs\BadRequest;
+use Sabre\DAV\Exception\BadRequest;
 use Sabre\Xml\Reader;
 use Sabre\Xml\XmlDeserializable;
 
@@ -82,7 +81,7 @@ class AddressBookQueryReport implements XmlDeserializable
     public $test;
 
     /**
-     * The mimetype of the content that should be returend. Usually
+     * The mimetype of the content that should be returned. Usually
      * text/vcard.
      *
      * @var string
@@ -146,7 +145,6 @@ class AddressBookQueryReport implements XmlDeserializable
                     }
                     break;
                 case '{'.Plugin::NS_CARDDAV.'}filter':
-
                     if (!is_null($newProps['filters'])) {
                         throw new BadRequest('You can only include 1 {'.Plugin::NS_CARDDAV.'}filter element');
                     }

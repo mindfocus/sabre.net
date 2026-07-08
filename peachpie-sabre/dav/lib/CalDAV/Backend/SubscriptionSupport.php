@@ -1,7 +1,6 @@
 <?php
 
 
-
 namespace Sabre\CalDAV\Backend;
 
 use Sabre\DAV;

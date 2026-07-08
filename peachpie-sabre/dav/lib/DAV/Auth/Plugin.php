@@ -1,10 +1,9 @@
 <?php
 
 
-
 namespace Sabre\DAV\Auth;
 
-use Sabre\DAV\ExceptionNs\NotAuthenticated;
+use Sabre\DAV\Exception\NotAuthenticated;
 use Sabre\DAV\Server;
 use Sabre\DAV\ServerPlugin;
 use Sabre\HTTP\RequestInterface;
@@ -58,7 +57,7 @@ class Plugin extends ServerPlugin
      *
      * @param Backend\BackendInterface $authBackend
      */
-    public function __construct(Backend\BackendInterface $authBackend = null)
+    public function __construct(?Backend\BackendInterface $authBackend = null)
     {
         if (!is_null($authBackend)) {
             $this->addBackend($authBackend);
@@ -113,8 +112,6 @@ class Plugin extends ServerPlugin
 
     /**
      * This method is called before any HTTP method and forces users to be authenticated.
-     *
-     * @return bool
      */
     public function beforeMethod(RequestInterface $request, ResponseInterface $response)
     {
@@ -204,8 +201,6 @@ class Plugin extends ServerPlugin
      * This method will for example cause a HTTP Basic backend to set a
      * WWW-Authorization header, indicating to the client that it should
      * authenticate.
-     *
-     * @return array
      */
     public function challenge(RequestInterface $request, ResponseInterface $response)
     {

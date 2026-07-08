@@ -1,6 +1,6 @@
 <?php
 
-namespace Sabre\VObject\ComponentNs;
+namespace Sabre\VObject\Component;
 
 use DateTimeImmutable;
 use DateTimeInterface;

@@ -1,13 +1,12 @@
 <?php
 
 
-
 namespace Sabre\CalDAV;
 
 use DateTimeZone;
 use Sabre\CalDAV\Xml\Request\CalendarMultiGetReport;
 use Sabre\DAV;
-use Sabre\DAV\ExceptionNs\BadRequest;
+use Sabre\DAV\Exception\BadRequest;
 use Sabre\DAV\INode;
 use Sabre\DAV\MkCol;
 use Sabre\DAV\Xml\Property\LocalHref;
@@ -86,7 +85,7 @@ class Plugin extends DAV\ServerPlugin
         if ($node instanceof DAV\IExtendedCollection) {
             try {
                 $node->getChild($name);
-            } catch (DAV\ExceptionNs\NotFound $e) {
+            } catch (DAV\Exception\NotFound $e) {
                 return ['MKCALENDAR'];
             }
         }
@@ -243,7 +242,7 @@ class Plugin extends DAV\ServerPlugin
      * @param mixed  $report
      * @param mixed  $path
      *
-     * @return bool
+     * @return bool|null
      */
     public function report($reportName, $report, $path)
     {
@@ -645,7 +644,7 @@ class Plugin extends DAV\ServerPlugin
 
         $calendar = $this->server->tree->getNodeForPath($uri);
         if (!$calendar instanceof ICalendar) {
-            throw new DAV\ExceptionNs\NotImplemented('The free-busy-query REPORT is only implemented on calendars');
+            throw new DAV\Exception\NotImplemented('The free-busy-query REPORT is only implemented on calendars');
         }
 
         $tzProp = '{'.self::NS_CALDAV.'}calendar-timezone';
@@ -720,7 +719,7 @@ class Plugin extends DAV\ServerPlugin
             return;
         }
 
-        // We're onyl interested in ICalendarObject nodes that are inside of a
+        // We're only interested in ICalendarObject nodes that are inside of a
         // real calendar. This is to avoid triggering validation and scheduling
         // for non-calendars (such as an inbox).
         list($parent) = Uri\split($path);
@@ -803,11 +802,11 @@ class Plugin extends DAV\ServerPlugin
                 $vobj = VObject\Reader::read($data);
             }
         } catch (VObject\ParseException $e) {
-            throw new DAV\ExceptionNs\UnsupportedMediaType('This resource only supports valid iCalendar 2.0 data. Parse error: '.$e->getMessage());
+            throw new DAV\Exception\UnsupportedMediaType('This resource only supports valid iCalendar 2.0 data. Parse error: '.$e->getMessage());
         }
 
         if ('VCALENDAR' !== $vobj->name) {
-            throw new DAV\ExceptionNs\UnsupportedMediaType('This collection can only support iCalendar objects.');
+            throw new DAV\Exception\UnsupportedMediaType('This collection can only support iCalendar objects.');
         }
 
         $sCCS = '{urn:ietf:params:xml:ns:caldav}supported-calendar-component-set';
@@ -870,7 +869,7 @@ class Plugin extends DAV\ServerPlugin
                     break;
                 case 3:
                     // Level 3 means a critical error
-                    throw new DAV\ExceptionNs\UnsupportedMediaType('Validation error in iCalendar: '.$message['message']);
+                    throw new DAV\Exception\UnsupportedMediaType('Validation error in iCalendar: '.$message['message']);
             }
         }
         if ($warningMessage) {
@@ -913,7 +912,7 @@ class Plugin extends DAV\ServerPlugin
     }
 
     /**
-     * This method is triggered whenever a subsystem reqeuests the privileges
+     * This method is triggered whenever a subsystem requests the privileges
      * that are supported on a particular node.
      */
     public function getSupportedPrivilegeSet(INode $node, array &$supportedPrivilegeSet)

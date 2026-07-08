@@ -69,5 +69,7 @@ jobs:
       run: dotnet pack peachpie-sabre/sabre.net.msbuildproj --configuration Release --no-build -p:PackageVersion=${{ steps.version.outputs.version }} -o ./nupkg
 
     - name: Publish to NuGet
-      # 直接用 dotnet nuget push，不依赖第三方 action（nuget/actions/publish@v1 路径已失效）
-      run: dotnet nuget push "./nupkg/*.nupkg" --api-key ${{ secrets.NUGET_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+      # 直接用 dotnet nuget push，不依赖第三方 action（nuget/actions/publish@v1 路径已失效）。
+      # 用 bash shell 以正确展开 nupkg 通配符（PowerShell 不展开 glob，会传字面 *.nupkg）。
+      shell: bash
+      run: dotnet nuget push ./nupkg/*.nupkg --api-key ${{ secrets.NUGET_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate

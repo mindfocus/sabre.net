@@ -25,10 +25,13 @@ jobs:
           8.0.x
 
     - name: Restore
-      run: dotnet restore peachpie-sabre/sabre.net.sln
+      run: dotnet restore sabre.net.tests/sabre.net.tests.csproj
 
     - name: Build
-      run: dotnet build peachpie-sabre/sabre.net.sln --configuration Release --no-restore
+      # 构建测试项目，自动拉起依赖链（sabre.net.msbuildproj + libxml2.net + runtimepatch）。
+      # 不构建整个 sln：sabre.net.bridge 含未完成的命名空间引用（Sabre.VObject.ComponentNs），
+      # 会阻断构建；bridge 不在任何测试/发布依赖链上，暂不纳入 CI。
+      run: dotnet build sabre.net.tests/sabre.net.tests.csproj --configuration Release --no-restore
 
     - name: Test
       run: dotnet test sabre.net.tests/sabre.net.tests.csproj --configuration Release --no-build --verbosity normal
@@ -51,10 +54,10 @@ jobs:
           8.0.x
 
     - name: Restore
-      run: dotnet restore peachpie-sabre/sabre.net.sln
+      run: dotnet restore peachpie-sabre/sabre.net.msbuildproj
 
     - name: Build (Release)
-      run: dotnet build peachpie-sabre/sabre.net.sln --configuration Release --no-restore
+      run: dotnet build peachpie-sabre/sabre.net.msbuildproj --configuration Release --no-restore
 
     # 从 tag 名（v1.0.5）提取版本号（1.0.5），覆盖 csproj 的 Version，保证 nuget 包版本与 tag 一致
     - name: Set version from tag

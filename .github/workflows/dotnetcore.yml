@@ -37,10 +37,18 @@ jobs:
       run: dotnet test sabre.net.tests/sabre.net.tests.csproj --configuration Release --no-build --verbosity normal
 
   # 仅在打 v* tag 时发布 nuget（普通 push/PR 只构建+测试）
+  # 使用 Trusted Publishing（OIDC），无需维护长期 API key。
+  # 前提：已在 nuget.org 的 sabre.net 包配置 Trusted Publishing policy，
+  # 关联本仓库（mindfocus/sabre.net）与本 workflow 文件（dotnetcore.yml）。
+  # 详见 https://learn.microsoft.com/nuget/nuget-org/trusted-publishing
   publish-nuget:
     needs: build-test
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: windows-latest
+    permissions:
+      # OIDC Trusted Publishing 必需：允许 GitHub 向 nuget.org 签发短期 token
+      id-token: write
+      contents: read
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -68,8 +76,16 @@ jobs:
     - name: Pack
       run: dotnet pack peachpie-sabre/sabre.net.msbuildproj --configuration Release --no-build -p:PackageVersion=${{ steps.version.outputs.version }} -o ./nupkg
 
+    # Trusted Publishing：用 OIDC 换取 nuget.org 短期 API key（无需 NUGET_KEY secret）
+    - name: Login to NuGet (Trusted Publishing / OIDC)
+      id: nuget-login
+      uses: NuGet/login@v1
+      with:
+        user: ${{ secrets.NUGET_USER }}
+
     - name: Publish to NuGet
-      # 直接用 dotnet nuget push，不依赖第三方 action（nuget/actions/publish@v1 路径已失效）。
-      # 用 bash shell 以正确展开 nupkg 通配符（PowerShell 不展开 glob，会传字面 *.nupkg）。
+      # 用 login 步骤输出的短期 token；bash shell 正确展开 nupkg 通配符
       shell: bash
-      run: dotnet nuget push ./nupkg/*.nupkg --api-key ${{ secrets.NUGET_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+      env:
+        NUGET_AUTH_TOKEN: ${{ steps.nuget-login.outputs.NUGET_AUTH_TOKEN }}
+      run: dotnet nuget push ./nupkg/*.nupkg --api-key ${{ steps.nuget-login.outputs.NUGET_AUTH_TOKEN }} --source https://api.nuget.org/v3/index.json --skip-duplicate

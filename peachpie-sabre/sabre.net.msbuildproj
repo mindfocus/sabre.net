@@ -3,7 +3,7 @@
     <OutputType>Library</OutputType>
     <Description>Nextsharp Sabre.NET PoC aligned with the project's current Sabre sources.</Description>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <Version>1.0.4-nextsharp-poc</Version>
+    <Version>1.0.5</Version>
     <Authors>mindfocus,nextsharp</Authors>
     <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
@@ -15,10 +15,17 @@
     <Compile Include="uri/**/*.php" />
     <Compile Include="vobject/**/*.php" />
     <Compile Include="xml/**/*.php" />
+    <!--
+      Psr\Log stub：sabre/dav 的 Server.php 依赖 Psr\Log\*（PSR-3 日志接口）。
+      原先由主仓库外部项目 nc/vendor_psr.msbuildproj 提供，但该引用假设 sabre.net
+      始终位于主仓库 external/sabre.net 下，导致独立 clone 时构建失败。
+      这里改为编译本仓库自带的 Psr/Log stub（PSR-3 标准接口，签名与上游一致），
+      使 sabre.net 完全自包含，无需外部 sibling 项目。
+    -->
+    <Compile Include="Psr/**/*.php" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\nc\vendor_psr.msbuildproj" />
     <ProjectReference Include="..\libxml2.net\libxml2.net.csproj" />
     <ProjectReference Include="..\sabre.net.runtimepatch\sabre.net.runtimepatch.csproj" />
   </ItemGroup>
